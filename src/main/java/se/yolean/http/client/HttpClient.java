@@ -1,6 +1,8 @@
 package se.yolean.http.client;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -22,23 +24,31 @@ public class HttpClient {
   private static Vertx vertx = Vertx.vertx();
   private static WebClient client = WebClient.create(vertx);
 
-  CircuitBreaker breaker = CircuitBreaker.create("onupdate-circuit-breaker", vertx,
+  // Todo: Optimize circuit breaker wrt. retries and timeout
+  CircuitBreaker initialBreaker = CircuitBreaker.create("onupdate-circuit-breaker", vertx,
     new CircuitBreakerOptions()
-      .setMaxFailures(8)
+      .setMaxRetries(5)
       .setTimeout(2000)
       .setFallbackOnFailure(false)
-      .setResetTimeout(1000));
+      .setResetTimeout(1000))
+      .retryPolicy(retryCount -> retryCount * 1000L);
 
   public void postUpdate(UpdateInfo updateInfo, List<String> ipList) {
-    logger.info("Posting new config event: " + updateInfo.toString());
-    logger.info("Sending update to " + ipList.size() + " client(s)");
+    // Todo: Perhaps use reason in HashMap to determine cause in Prometheus logging
+    Map<String, String> failedIps = new HashMap<>();
+    logger.info("Posting update to {}", ipList);
     for (String ip : ipList) {
-        logger.info("Sending update to {}", ip);  
+      initialBreaker.execute(promise -> {
         client
           .post(3000, ip, "/onupdate")
           .sendJson(updateInfo)
-          .onSuccess(response -> System.out.println("Received response with status code" + response.statusCode() ))
-          .onFailure(err -> System.out.println("Something went wrong " + err.getMessage()));
+          .onFailure(err -> failedIps.put(ip, err.getMessage()));
+      });
+    }
+    // Todo: Have some form of resync to failing on pods in termination stage.
+    // Suggestion: Listen to events and delete early in controller or wait longer here and hope that pod is fully terminated during retry period.
+    if (!failedIps.isEmpty()) {
+      logger.error("Failed to post update to {}", failedIps.keySet());
     }
   }
 }

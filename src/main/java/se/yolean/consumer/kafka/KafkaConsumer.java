@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import io.vertx.kafka.client.common.TopicPartition;
 import io.vertx.mutiny.core.eventbus.EventBus;
-
+import se.yolean.KeyValueStore;
+import se.yolean.http.client.HttpClient;
 import se.yolean.model.Update;
 import se.yolean.model.UpdateInfo;
 
@@ -22,29 +23,36 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 @ApplicationScoped
 public class KafkaConsumer {
 
-  private Map<String, Update> updateMap = new HashMap<>();
+  //private static Map<String, Update> updateMap = new HashMap<>();
 
-  final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
+  private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
 
   @Inject
   EventBus bus;
 
-  public Update getTopicUpdate(String key) {
-    return updateMap.get(key);
-  }
+  @Inject
+  KeyValueStore keyValueStore;
 
-  private void updateKeyCache(Update update) {
+  @Inject
+  HttpClient httpClient;
+
+  /* public Update getTopicUpdate(String key) {
+    return updateMap.get(key);
+  } */
+
+  /* private void updateKeyCache(Update update) {
     updateMap.put(update.getKey(), update);
-  }
+  } */
   
   @Incoming("config")
   public void consumer(ConsumerRecords<String, String> records) {
-    logger.info("New record(s) received");
+    logger.info("New config @incoming");
     for (ConsumerRecord<String, String> record : records) {
       if (record.key() != null) {
         TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
         Update update = new Update(topicPartition, record.offset(), record.key(), record.value());
-        updateKeyCache(update);
+        keyValueStore.updateKeyCache(update);
+        //updateKeyCache(update);
       }
     }
     sendUpdateEvent();
@@ -52,10 +60,10 @@ public class KafkaConsumer {
 
   public void sendUpdateEvent() {
     Map<String, Long> updateInfo = new HashMap<>();
-    updateMap.forEach((key, update) -> updateInfo.put(key, update.getOffset()));
+    //updateMap.forEach((key, value) -> updateInfo.put(key, value.getOffset()));
+    keyValueStore.getUpdateMap().forEach((key, value) -> updateInfo.put(key, value.getOffset()));
     UpdateInfo updateInfoObject = new UpdateInfo(updateInfo);
-    bus.publish("newConfigEvent", updateInfoObject);
-
-
+    //bus.publish("newConfigEvent", updateInfoObject);
+    httpClient.postUpdate(updateInfoObject, keyValueStore.getIpList());
   }
 }

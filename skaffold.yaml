@@ -3,6 +3,8 @@ kind: Config
 metadata:
   name: kkv2
 build:
+  local:
+    push: false
   tagPolicy:
     sha256: {}
   artifacts:

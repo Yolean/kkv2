@@ -1,12 +1,12 @@
 quarkus:
-  #container-image:
-    #build: true
-    #image: yolean/kkv2
+  container-image:
+    build: true
+    image: yolean/kkv2
   tls:
     trust-all: true
-  rest-client:
-    text-response-service:
-      url: http://kkv-test-client-headful-service.kkv.svc.cluster.local:3000
+#  rest-client:
+#    text-response-service:
+#      url: http://kkv-test-client-headful-service.kkv.svc.cluster.local:3000
   
   #jib:
   #  base-jvm-image: ${IMAGE_BASE_JRE:eclipse-temurin:17-jre-alpine}

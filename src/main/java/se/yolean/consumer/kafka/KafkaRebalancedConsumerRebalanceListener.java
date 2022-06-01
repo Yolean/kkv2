@@ -36,7 +36,7 @@ public class KafkaRebalancedConsumerRebalanceListener implements KafkaConsumerRe
 
  @Override
  public void onPartitionsAssigned(Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {
-   logger.info("Partition(s) {} assigned", partitions);
+    logger.info("Partition assigned");
     consumer.seekToBeginning(partitions);
   }
 }

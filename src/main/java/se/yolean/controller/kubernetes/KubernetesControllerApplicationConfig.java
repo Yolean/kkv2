@@ -1,8 +1,5 @@
 package se.yolean.controller.kubernetes;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,10 +12,9 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
-import io.quarkus.vertx.ConsumeEvent;
 import io.vertx.core.eventbus.EventBus;
+import se.yolean.KeyValueStore;
 import se.yolean.http.client.HttpClient;
-import se.yolean.model.UpdateInfo;
 
 @ApplicationScoped
 public class KubernetesControllerApplicationConfig {
@@ -32,9 +28,12 @@ public class KubernetesControllerApplicationConfig {
   HttpClient httpClient;
 
   @Inject
+  KeyValueStore keyValueStore;
+
+  @Inject
   EventBus bus;
 
-  List<String> ipList = new ArrayList<>();
+  //List<String> ipList = new ArrayList<>();
 
   String TARGET_LABEL = "kkv-test-client";
 
@@ -57,9 +56,12 @@ public class KubernetesControllerApplicationConfig {
         String podIp = pod.getStatus().getPodIP();
 
         if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
-          if (!ipList.contains(podIp)) {
+          /* if (!ipList.contains(podIp)) {
             ipList.add(podIp);
-            bus.publish("newSubscriber", podIp);
+          } */
+
+          if (!keyValueStore.getIpList().contains(podIp)) {
+            keyValueStore.addIp(podIp);
           }
         }
       }
@@ -67,12 +69,18 @@ public class KubernetesControllerApplicationConfig {
       @Override
       public void onUpdate(Pod oldPod, Pod newPod) {
         String oldIp = oldPod.getStatus().getPodIP();
+        // oldPod.getStatus().getContainerStatuses().get(0).get
         String newIp = newPod.getStatus().getPodIP();
 
-        if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
+        /* if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
           if (oldIp == null && newIp != null && !ipList.contains(newIp)) {
             ipList.add(newIp);
-            bus.publish("newSubscriber", newIp);
+          }
+        } */
+
+        if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
+          if (oldIp == null && newIp != null && !keyValueStore.getIpList().contains(newIp)) {
+            keyValueStore.addIp(newIp);
           }
         }
       }
@@ -80,15 +88,19 @@ public class KubernetesControllerApplicationConfig {
       @Override
       public void onDelete(Pod pod, boolean deletedFinalStateUnknown) {
         String podIp = pod.getStatus().getPodIP();
-        if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
+        /* if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
           ipList.remove(podIp);
+        } */
+
+        if(podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
+          keyValueStore.removeIp(podIp);
         }
       }
     };
   }
 
-  @ConsumeEvent("newConfigEvent")
+  /* @ConsumeEvent("newConfigEvent")
   public void onNewConfigEvent(UpdateInfo updateInfo) {
-    httpClient.postUpdate(updateInfo, ipList);
-  }
+    httpClient.postUpdate(updateInfo, keyValueStore.getIpList());
+  } */
 }

@@ -20,5 +20,4 @@ public class UpdateInfo {
   public void setUpdateInfo(Map<String, Long> updateInfo) {
     this.updateInfo = updateInfo;
   }
-
 }

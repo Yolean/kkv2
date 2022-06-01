@@ -3,11 +3,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: kkv2
+  namespace: kkv
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kkv2
+  namespace: kkv
   labels:
     app: kkv2
 spec:
@@ -24,7 +26,6 @@ spec:
       containers:
         - name: kkv2
           image: yolean/kkv2
-          imagePullPolicy: Never
           ports:
             - containerPort: 8080
       serviceAccountName: kkv2
@@ -32,14 +33,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: kkv2
+  name: kkv
+  namespace: kkv
   labels:
     app: kkv2
 spec:
   ports:
-    - port: 8080
-      name: http
-  type: LoadBalancer
+  - port: 8080
+    name: http
   selector:
     app: kkv2
 ---

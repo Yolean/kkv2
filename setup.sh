@@ -9,12 +9,10 @@ helm install redpanda-operator redpanda/redpanda-operator --namespace redpanda-s
 kubectl create namespace kkv
 
 # This step fails very often. Usually I recommend to run this step manually.
-kubectl apply -n kkv -f https://raw.githubusercontent.com/redpanda-data/redpanda/dev/src/go/k8s/config/samples/one_node_cluster.yaml
+kubectl apply -f https://raw.githubusercontent.com/redpanda-data/redpanda/dev/src/go/k8s/config/samples/one_node_cluster.yaml
 
-kubectl exec -n kkv -it one-node-cluster-0 bash
+kubectl exec -n kkv -it redpanda-0 bash
 rpk topic create config
 exit
-
-kubens kkv
 
 skaffold run
