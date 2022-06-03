@@ -1,54 +1,67 @@
 package se.yolean.http.client;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.circuitbreaker.CircuitBreaker;
-import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import se.yolean.model.UpdateInfo;
-
+import se.yolean.KeyValueStore;
+import se.yolean.model.Update;
 
 @ApplicationScoped
 public class HttpClient {
+
+  @Inject
+  KeyValueStore keyValueStore;
 
   private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
   private static Vertx vertx = Vertx.vertx();
   private static WebClient client = WebClient.create(vertx);
 
-  // Todo: Optimize circuit breaker wrt. retries and timeout
-  CircuitBreaker initialBreaker = CircuitBreaker.create("onupdate-circuit-breaker", vertx,
-    new CircuitBreakerOptions()
-      .setMaxRetries(5)
-      .setTimeout(2000)
-      .setFallbackOnFailure(false)
-      .setResetTimeout(1000))
-      .retryPolicy(retryCount -> retryCount * 1000L);
+  public void postUpdate(List<Update> updateList) {
+    List<String> ipList = keyValueStore.getIpList();
+    JsonObject updateInfo = jsonBuilder(updateList);
 
-  public void postUpdate(UpdateInfo updateInfo, List<String> ipList) {
-    // Todo: Perhaps use reason in HashMap to determine cause in Prometheus logging
-    Map<String, String> failedIps = new HashMap<>();
-    logger.info("Posting update to {}", ipList);
     for (String ip : ipList) {
-      initialBreaker.execute(promise -> {
-        client
-          .post(3000, ip, "/onupdate")
-          .sendJson(updateInfo)
-          .onFailure(err -> failedIps.put(ip, err.getMessage()));
+      client
+      .post(3000, ip, "/onupdate")
+      .sendJsonObject(updateInfo, ar -> {
+        if (ar.succeeded()) {
+          logger.info("Successfully posted update to " + ip);
+        } else {
+          logger.error("Failed to post update to " + ip);
+        }
       });
     }
-    // Todo: Have some form of resync to failing on pods in termination stage.
-    // Suggestion: Listen to events and delete early in controller or wait longer here and hope that pod is fully terminated during retry period.
-    if (!failedIps.isEmpty()) {
-      logger.error("Failed to post update to {}", failedIps.keySet());
+  }
+
+  public JsonObject jsonBuilder(List<Update> updates) {
+    JsonObject jsonObject = new JsonObject();
+    
+    jsonObject.put("v", 1);
+    // TODO: FIX THIS, THIS IS A HACK FOR NOW
+    jsonObject.put("topic", updates.get(0).getTopic());
+
+    JsonObject offsetsJsonObject = new JsonObject();
+    for (Update update : updates) {
+      offsetsJsonObject.put(Integer.toString(update.getPartition()), update.getOffset());
     }
+    jsonObject.put("offsets", offsetsJsonObject);
+
+    JsonObject updatesJsonObject = new JsonObject();
+    for (Update update : updates) {
+      updatesJsonObject.put(update.getKey(), new JsonObject());
+    }
+    jsonObject.put("updates", updatesJsonObject);
+
+    return jsonObject;
   }
 }
+

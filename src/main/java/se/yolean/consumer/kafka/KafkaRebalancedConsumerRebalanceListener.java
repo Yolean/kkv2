@@ -19,21 +19,6 @@ public class KafkaRebalancedConsumerRebalanceListener implements KafkaConsumerRe
 
   private static final Logger logger = LoggerFactory.getLogger(KafkaRebalancedConsumerRebalanceListener.class);
   
-/* 
-  @Override
-  public void onPartitionsAssigned(Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {
-    logger.info("Partition assigned!");
-
-    Map<TopicPartition, Long> lastRecords = new HashMap<>();
-    logger.info("Assigned partition: {}", partitions);
-
-    consumer.endOffsets(partitions).forEach((topicPartition, offset) -> lastRecords.put(topicPartition, offset));
-    
-    lastRecords.forEach((topicPartition, offset) -> 
-      consumer.seek(topicPartition, offset - 1));
-  }
- */
-
  @Override
  public void onPartitionsAssigned(Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {
     logger.info("Partition assigned");
