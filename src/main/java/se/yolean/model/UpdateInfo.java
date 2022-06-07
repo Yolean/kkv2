@@ -20,4 +20,9 @@ public class UpdateInfo {
   public void setUpdateInfo(Map<String, Long> updateInfo) {
     this.updateInfo = updateInfo;
   }
+
+  @Override
+  public String toString() {
+    return "UpdateInfo [updateInfo=" + updateInfo + "]";
+  }
 }

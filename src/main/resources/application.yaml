@@ -4,17 +4,23 @@ quarkus:
     image: yolean/kkv2
   tls:
     trust-all: true
-#  rest-client:
-#    text-response-service:
-#      url: http://kkv-test-client-headful-service.kkv.svc.cluster.local:3000
-  
-  #jib:
-  #  base-jvm-image: ${IMAGE_BASE_JRE:eclipse-temurin:17-jre-alpine}
+  jib:
+    platforms: linux/arm64/v8
+    #base-jvm-image: ${IMAGE_BASE_JRE:eclipse-temurin:17-jre-alpine}
 
 
-kafka:
-  bootstrap:
-    servers: one-node-cluster.kkv.svc.cluster.local:9092
+"%dev":
+  quarkus:
+    kafka:
+      devservices:
+        enabled: true
+        #image: vectorized/redpanda:latest
+        #port: 9092    
+    
+"%prod":
+  kafka:
+    bootstrap:
+      servers: one-node-cluster.kkv.svc.cluster.local:9092
 
 mp:
   messaging:
@@ -22,7 +28,7 @@ mp:
       config: 
         connector: smallrye-kafka
         value:
-          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
         key:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         auto:

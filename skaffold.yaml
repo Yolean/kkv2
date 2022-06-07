@@ -15,6 +15,7 @@ build:
         clean
         package
         -Dquarkus.container-image.build=true
+        -DskipTests=true
       dependencies:
         paths:
         - "**/*"

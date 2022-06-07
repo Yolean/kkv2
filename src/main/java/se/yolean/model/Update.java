@@ -1,16 +1,16 @@
 package se.yolean.model;
 
-import io.vertx.kafka.client.common.TopicPartition;
-
 public class Update {
   
-  private TopicPartition topicPartition;
+  private String topic;
+  private int partition;
   private long offset;
   private String key;
-  private String value;
+  private byte[] value;
   
-  public Update(TopicPartition topicPartition, long offset, String key, String value) {
-    this.topicPartition = topicPartition;
+  public Update(String topic, int partition, long offset, String key, byte[] value) {
+    this.topic = topic;
+    this.partition = partition;
     this.offset = offset;
     this.key = key;
     this.value = value;
@@ -19,8 +19,20 @@ public class Update {
   public Update() {
   }
   
-  public TopicPartition getTopicPartition() {
-    return topicPartition;
+  public String getTopic() {
+    return topic;
+  }
+
+  public void setTopic(String topic) {
+    this.topic = topic;
+  }
+
+  public int getPartition() {
+    return partition;
+  }
+
+  public void setPartition(int partition) {
+    this.partition = partition;
   }
   
   public long getOffset() {
@@ -31,12 +43,8 @@ public class Update {
     return key;
   }
   
-  public String getValue() {
+  public byte[] getValue() {
     return value;
-  }
-
-  public void setTopicPartition(TopicPartition topicPartition) {
-    this.topicPartition = topicPartition;
   }
 
   public void setOffset(long offset) {
@@ -47,13 +55,14 @@ public class Update {
     this.key = key;
   }
 
-  public void setValue(String value) {
+  public void setValue(byte[] value) {
     this.value = value;
   }
 
   @Override
   public String toString() {
-    return "Update [topicPartition=" + topicPartition + ", offset=" + offset + ", key=" + key + ", value=" + value + "]";
+    return "Update [topic=" + topic + ", partition=" + partition + ", offset=" + offset + ", key=" + key + ", value="
+        + value + "]";
   }
 
 }
