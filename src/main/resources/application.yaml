@@ -4,6 +4,10 @@ quarkus:
     image: yolean/kkv2
   tls:
     trust-all: true
+  jib:
+    platforms: linux/arm64/v8
+    #base-jvm-image: ${IMAGE_BASE_JRE:eclipse-temurin:17-jre-alpine}
+
 
 "%dev":
   quarkus:
@@ -14,10 +18,9 @@ quarkus:
         #port: 9092    
     
 "%prod":
-  quarkus:
-    kafka:
-      bootstrap:
-        servers: one-node-cluster.kkv.svc.cluster.local:9092
+  kafka:
+    bootstrap:
+      servers: one-node-cluster.kkv.svc.cluster.local:9092
 
 mp:
   messaging:

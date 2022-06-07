@@ -1,5 +1,6 @@
 package se.yolean;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,7 @@ import se.yolean.model.Update;
 import se.yolean.model.UpdateInfo;
 
 @ApplicationScoped
-public class KeyValueStore {
+public class KeyValueStore implements Serializable {
   
   private List<String> ipList = new ArrayList<>();
   private Map<String, Update> updateMap = new HashMap<>();

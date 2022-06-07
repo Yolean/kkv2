@@ -2,6 +2,7 @@ package se.yolean.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 
 import javax.inject.Inject;
@@ -23,7 +24,7 @@ import javax.ws.rs.core.UriInfo;
 import se.yolean.KeyValueStore;
 
 @Path("/cache/v1")
-public class CacheResource {
+public class CacheResource{
 
   @Inject
   KeyValueStore keyValueStore;
@@ -82,6 +83,7 @@ public class CacheResource {
         }
       }
     };
+    System.out.println(stream);
     return Response.ok(stream).build();
   }
 
