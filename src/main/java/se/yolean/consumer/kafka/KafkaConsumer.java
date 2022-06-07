@@ -10,7 +10,6 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.mutiny.core.eventbus.EventBus;
 import se.yolean.KeyValueStore;
 import se.yolean.http.client.HttpClient;
 import se.yolean.model.Update;
@@ -22,9 +21,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 public class KafkaConsumer {
 
   private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
-
-  @Inject
-  EventBus bus;
 
   @Inject
   KeyValueStore keyValueStore;
@@ -43,9 +39,6 @@ public class KafkaConsumer {
         updateList.add(update);
       }
     }
-    //httpClient.postUpdate(keyValueStore.getUpdateInfo(), keyValueStore.getIpList());
-
     httpClient.postUpdate(updateList);
-    
   }
 }

@@ -44,9 +44,9 @@ public class HttpClient {
 
   public JsonObject jsonBuilder(List<Update> updates) {
     JsonObject jsonObject = new JsonObject();
-    
+
     jsonObject.put("v", 1);
-    // TODO: FIX THIS, THIS IS A HACK FOR NOW
+    // TODO: FIX THIS, THIS IS A HACK FOR NOW. How should we handle multiple topics?
     jsonObject.put("topic", updates.get(0).getTopic());
 
     JsonObject offsetsJsonObject = new JsonObject();

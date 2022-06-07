@@ -5,9 +5,19 @@ quarkus:
   tls:
     trust-all: true
 
-kafka:
-  bootstrap:
-    servers: one-node-cluster.kkv.svc.cluster.local:9092
+"%dev":
+  quarkus:
+    kafka:
+      devservices:
+        enabled: true
+        #image: vectorized/redpanda:latest
+        #port: 9092    
+    
+"%prod":
+  quarkus:
+    kafka:
+      bootstrap:
+        servers: one-node-cluster.kkv.svc.cluster.local:9092
 
 mp:
   messaging:
