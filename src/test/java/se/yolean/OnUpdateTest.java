@@ -14,30 +14,19 @@ import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.kafka.InjectKafkaCompanion;
-import io.quarkus.test.kafka.KafkaCompanionResource;
-import io.smallrye.reactive.messaging.kafka.companion.KafkaCompanion;
 import se.yolean.consumer.kafka.KafkaConsumer;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
-
-
-
 @QuarkusTest
-@QuarkusTestResource(KafkaCompanionResource.class)
-public class KafkaConsumerTest {
-  
-  @InjectKafkaCompanion
-  KafkaCompanion companion;
-
+public class OnUpdateTest {
+    
   @Inject
   KeyValueStore keyValueStore;
 
   @Inject
   KafkaConsumer kafkaConsumer;
+
+  @InjectSpy
 
   static ConsumerRecords<String, byte[]> consumerRecords;
 
@@ -54,30 +43,13 @@ public class KafkaConsumerTest {
   }
 
   @Test
-  public void assertThatLatestRecordReturnedForKey() {
+  public void assertCorrectOnUpdateFormatting() {
     kafkaConsumer.consumer(consumerRecords);
 
-    given()
-      .when().get("/cache/v1/raw/key1")
-      .then()
-        .statusCode(200)
-        .body(is("value2"));
 
-    given()
-    .when().get("/cache/v1/raw/key2")
-    .then()
-      .statusCode(200)
-      .body(is("value3"));
   }
 
-  @Test
-  public void assertCorrectOffset() {
-    kafkaConsumer.consumer(consumerRecords);
 
-    given()
-      .when().get("/cache/v1/offset/topic/1")
-      .then()
-        .statusCode(200)
-        .body(is("2"));
-  }
+
+
 }
