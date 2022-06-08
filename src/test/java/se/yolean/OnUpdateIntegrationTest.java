@@ -1,4 +1,4 @@
-package se.yolean;
+/* package se.yolean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,14 +11,30 @@ import javax.inject.Inject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import io.quarkus.test.Mock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import se.yolean.consumer.kafka.KafkaConsumer;
+import se.yolean.http.client.HttpClient;
+import se.yolean.model.Update;
+
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
-public class OnUpdateTest {
+@Ignore
+@RunWith(MockitoJUnitRunner.class)
+public class OnUpdateIntegrationTest {
     
   @Inject
   KeyValueStore keyValueStore;
@@ -26,7 +42,8 @@ public class OnUpdateTest {
   @Inject
   KafkaConsumer kafkaConsumer;
 
-  @InjectSpy
+  @Captor
+  ArgumentCaptor<List<Update>> updateCaptor;
 
   static ConsumerRecords<String, byte[]> consumerRecords;
 
@@ -43,13 +60,20 @@ public class OnUpdateTest {
   }
 
   @Test
-  public void assertCorrectOnUpdateFormatting() {
+  public void verifyCorrectOnUpdateRequest() {
+    HttpClient httpClient = mock(HttpClient.class);
+    ArgumentCaptor<List<Update>> argument = ArgumentCaptor.forClass(List.class);
+    //doNothing().when(httpClient).postUpdate(argument.capture());
+    
+    verify(httpClient).postUpdate(argument.capture());
+    
+    List<Update> updates = argument.getValue();
+    Assertions.assertEquals(updates.size(), 3);
+
     kafkaConsumer.consumer(consumerRecords);
 
+    
 
+    
   }
-
-
-
-
-}
+} */

@@ -2,7 +2,6 @@ package se.yolean.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.Iterator;
 
 import javax.inject.Inject;

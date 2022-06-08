@@ -5,8 +5,8 @@ quarkus:
   tls:
     trust-all: true
   jib:
-    platforms: linux/arm64/v8
-    #base-jvm-image: ${IMAGE_BASE_JRE:eclipse-temurin:17-jre-alpine}
+    #platforms: linux/arm64/v8
+    platforms: linux/amd64
 
 
 "%dev":
@@ -15,7 +15,7 @@ quarkus:
       devservices:
         enabled: true
         #image: vectorized/redpanda:latest
-        #port: 9092    
+        #port: 9092
     
 "%prod":
   kafka:
@@ -36,3 +36,7 @@ mp:
             reset: earliest
         consumer-rebalance-listener:
           name: config.rebalancer
+
+se:
+  yolean:
+    client-proxy/mp-rest/scope: javax.inject.Singleton

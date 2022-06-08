@@ -55,7 +55,6 @@ public class KubernetesControllerApplicationConfig {
       @Override
       public void onAdd(Pod pod) {
         String podIp = pod.getStatus().getPodIP();
-        logger.info(pod.getStatus().getContainerStatuses().toString());
 
         if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
           if (!keyValueStore.getIpList().contains(podIp)) {

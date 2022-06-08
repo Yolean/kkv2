@@ -1,6 +1,5 @@
 package se.yolean;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,7 @@ import se.yolean.model.Update;
 import se.yolean.model.UpdateInfo;
 
 @ApplicationScoped
-public class KeyValueStore implements Serializable {
+public class KeyValueStore {
   
   private List<String> ipList = new ArrayList<>();
   private Map<String, Update> updateMap = new HashMap<>();
@@ -69,5 +68,9 @@ public class KeyValueStore implements Serializable {
     List<byte[]> values = new ArrayList<>();
     updateMap.forEach((key, value) -> values.add(value.getValue()));
     return values;
+  }
+
+  public void setTopicPartitionOffset(Map<TopicPartition, Long> topicPartitionOffset) {
+    this.topicPartitionOffset = topicPartitionOffset;
   }
 }

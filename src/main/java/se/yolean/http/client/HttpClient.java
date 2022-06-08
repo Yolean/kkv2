@@ -2,8 +2,8 @@ package se.yolean.http.client;
 
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,8 @@ import io.vertx.ext.web.client.WebClient;
 import se.yolean.KeyValueStore;
 import se.yolean.model.Update;
 
-@ApplicationScoped
+//@ApplicationScoped
+@Singleton
 public class HttpClient {
 
   @Inject

@@ -23,11 +23,11 @@ public class KafkaConsumer {
   private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
 
   @Inject
-  KeyValueStore keyValueStore;
+  HttpClient httpClient;
 
   @Inject
-  HttpClient httpClient;
-  
+  KeyValueStore keyValueStore;
+
   @Incoming("config")
   public void consumer(ConsumerRecords<String, byte[]> records) {
     logger.info("New config @incoming");
