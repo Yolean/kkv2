@@ -1,5 +1,6 @@
 package se.yolean.controller.kubernetes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -51,7 +52,7 @@ public class KubernetesControllerApplicationConfig {
   // Include readiness somehow in order to avoid post to unavailable pods
   // Idea: When Pod is no longer ready, save timestamp och compare to latest record to determine if push is needed when ready.
 
-  // TODO: Differentiate between startup and new pod after startup so that we do not push updates two times.
+  // TODO: Differentiate between startup and new pod after startup so that we do not push updates two times. should be solved with phase boolean.
   @Singleton
   ResourceEventHandler<Pod> podReconciler(SharedIndexInformer<Pod> podInformer) {
     return new ResourceEventHandler<>() {
@@ -73,6 +74,22 @@ public class KubernetesControllerApplicationConfig {
       public void onUpdate(Pod oldPod, Pod newPod) {
         String oldIp = oldPod.getStatus().getPodIP();
         String newIp = newPod.getStatus().getPodIP();
+
+        // https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+
+        // Could be used to get ports if we can label the correct container for each pod.
+        /* newPod.getSpec().getContainers().stream().forEach(c -> {
+          c.getPorts());
+        }); */
+
+
+        // Could be used to determine if pod's containers are ready and thus if pod is ready.
+        /* newPod.getStatus().getContainerStatuses().stream().forEach(c -> {
+          c.getReady();
+        }); */
+
+
+          
 
         if(newPod.isMarkedForDeletion() && keyValueStore.getIpList().contains(newIp)) {
           keyValueStore.removeIp(newIp);
