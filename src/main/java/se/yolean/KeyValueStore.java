@@ -2,19 +2,21 @@ package se.yolean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import io.vertx.kafka.client.common.TopicPartition;
+import se.yolean.model.Endpoint;
 import se.yolean.model.Update;
 import se.yolean.model.UpdateInfo;
 
 @ApplicationScoped
 public class KeyValueStore {
   
-  private List<String> ipList = new ArrayList<>();
+  private HashSet<Endpoint> endpoints = new HashSet<>();
   private Map<String, Update> updateMap = new HashMap<>();
   private Map<TopicPartition, Long> topicPartitionOffset = new HashMap<>();
 
@@ -24,12 +26,12 @@ public class KeyValueStore {
   public KeyValueStore() {
   }
 
-  public List<String> getIpList() {
-    return ipList;
+  public HashSet<Endpoint> getEndpoints() {
+    return endpoints;
   }
 
-  public void setIpList(List<String> ipList) {
-    this.ipList = ipList;
+  public void setEndpoints(HashSet<Endpoint> endpoints) {
+    this.endpoints = endpoints;
   }
 
   public Map<String, Update> getUpdateMap() {
@@ -40,12 +42,12 @@ public class KeyValueStore {
     this.updateMap = updateMap;
   }
 
-  public void addIp(String ip) {
-    ipList.add(ip);
+  public void addEndpoint(Endpoint endpoint) {
+    endpoints.add(endpoint);
   }
 
-  public void removeIp(String ip) {
-    ipList.remove(ip);
+  public void removeEndpoint(Endpoint endpoint) {
+    endpoints.remove(endpoint);
   }
 
   public void updateKeyCache(Update update) {
@@ -83,5 +85,19 @@ public class KeyValueStore {
 
   public void setStartupPhase(boolean startupPhase) {
     this.startupPhase = startupPhase;
+  }
+
+  public boolean endpointExists(Endpoint endpoint) {
+    return endpoints.contains(endpoint);
+  }
+
+  public List<String> getipList() {
+    List<String> ipList = new ArrayList<>();
+    endpoints.forEach(ep -> ipList.add(ep.getIp()));
+    return ipList;
+  }
+
+  public void removeEndpointByIp(String ip) {
+    endpoints.removeIf(ep -> ep.getIp().equals(ip));
   }
 }

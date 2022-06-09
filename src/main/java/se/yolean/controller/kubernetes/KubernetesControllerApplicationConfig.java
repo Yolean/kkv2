@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.vertx.core.eventbus.EventBus;
 import se.yolean.KeyValueStore;
 import se.yolean.http.client.HttpClient;
+import se.yolean.model.Endpoint;
 
 @ApplicationScoped
 public class KubernetesControllerApplicationConfig {
@@ -49,7 +50,7 @@ public class KubernetesControllerApplicationConfig {
   // Include readiness somehow in order to avoid post to unavailable pods
   // Idea: When Pod is no longer ready, save timestamp och compare to latest record to determine if push is needed when ready.
 
-  // TODO: Differentiate between startup and new pod after startup so that we do not push updates two times. should be solved with phase boolean.
+  // TODO: Better filtering of pods
   @Singleton
   ResourceEventHandler<Pod> podReconciler(SharedIndexInformer<Pod> podInformer) {
     return new ResourceEventHandler<>() {
@@ -58,10 +59,11 @@ public class KubernetesControllerApplicationConfig {
       public void onAdd(Pod pod) {
         String podIp = pod.getStatus().getPodIP();
         if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
-          if (!keyValueStore.getIpList().contains(podIp)) {
-            keyValueStore.addIp(podIp);
+          Endpoint newEndpoint = new Endpoint(pod.getMetadata().getName(), podIp);
+          if (!keyValueStore.endpointExists(newEndpoint)) {
+            keyValueStore.addEndpoint(newEndpoint);
             if(!keyValueStore.isStartupPhase()) {
-              httpClient.sendCacheNewPod(podIp);
+              httpClient.sendCacheNewPod(newEndpoint);
             } 
           }
         }
@@ -71,6 +73,7 @@ public class KubernetesControllerApplicationConfig {
       public void onUpdate(Pod oldPod, Pod newPod) {
         String oldIp = oldPod.getStatus().getPodIP();
         String newIp = newPod.getStatus().getPodIP();
+        Endpoint newEndpoint = new Endpoint(newPod.getMetadata().getName(), newIp);
 
         // https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
 
@@ -84,18 +87,16 @@ public class KubernetesControllerApplicationConfig {
         /* newPod.getStatus().getContainerStatuses().stream().forEach(c -> {
           c.getReady();
         }); */
-
-
           
 
-        if(newPod.isMarkedForDeletion() && keyValueStore.getIpList().contains(newIp)) {
-          keyValueStore.removeIp(newIp);
+        if(newPod.isMarkedForDeletion() && keyValueStore.endpointExists(newEndpoint)) {
+          keyValueStore.removeEndpoint(newEndpoint);
         }
         else if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
-          if (oldIp == null && newIp != null && !keyValueStore.getIpList().contains(newIp)) {
-            keyValueStore.addIp(newIp);
+          if (oldIp == null && newIp != null && !keyValueStore.endpointExists(newEndpoint)) {
+            keyValueStore.addEndpoint(newEndpoint);
             if(!keyValueStore.isStartupPhase()) {
-              httpClient.sendCacheNewPod(newIp);
+              httpClient.sendCacheNewPod(newEndpoint);
             }
           }
         }
@@ -105,7 +106,7 @@ public class KubernetesControllerApplicationConfig {
       public void onDelete(Pod pod, boolean deletedFinalStateUnknown) {
         String podIp = pod.getStatus().getPodIP();
         if(podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
-          keyValueStore.removeIp(podIp);
+          keyValueStore.removeEndpointByIp(podIp);
         }
       }
     };
