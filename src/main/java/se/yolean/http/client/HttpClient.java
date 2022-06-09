@@ -3,20 +3,21 @@ package se.yolean.http.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.vertx.circuitbreaker.CircuitBreaker;
+import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import se.yolean.KeyValueStore;
 import se.yolean.model.Update;
 
-//@ApplicationScoped
-@Singleton
+@ApplicationScoped
 public class HttpClient {
 
   @Inject
@@ -27,19 +28,25 @@ public class HttpClient {
   private static Vertx vertx = Vertx.vertx();
   private static WebClient client = WebClient.create(vertx);
 
+  CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
+  new CircuitBreakerOptions().setMaxRetries(5).setTimeout(2000));
+
   public void postUpdate(List<Update> updateList) {
     List<String> ipList = keyValueStore.getIpList();
     JsonObject updateInfo = jsonBuilder(updateList);
 
     for (String ip : ipList) {
-      client
-      .post(3000, ip, "/onupdate")
-      .sendJsonObject(updateInfo, ar -> {
+      breaker.execute(future -> {
+        client
+          .post(3000, ip, "/onupdate")
+          .sendJsonObject(updateInfo, ar -> {
         if (ar.succeeded()) {
-          logger.info("Successfully posted update to " + ip);
+          future.complete();
         } else {
-          logger.error("Failed to post update to " + ip);
+          logger.info("FAILED");
+          future.fail(ar.cause());
         }
+      });
       });
     }
   }
