@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.vertx.core.eventbus.EventBus;
 import se.yolean.KeyValueStore;
 import se.yolean.http.client.HttpClient;
+import se.yolean.model.Endpoint;
 
 @ApplicationScoped
 public class KubernetesControllerApplicationConfig {
@@ -58,8 +59,8 @@ public class KubernetesControllerApplicationConfig {
       public void onAdd(Pod pod) {
         String podIp = pod.getStatus().getPodIP();
         if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
-          if (!keyValueStore.getIpList().contains(podIp)) {
-            keyValueStore.addIp(podIp);
+          if (!keyValueStore.endpointExists(podIp)) {
+            keyValueStore.addEndpoint(new Endpoint(pod.getMetadata().getName(), podIp));
             if(!keyValueStore.isStartupPhase()) {
               httpClient.sendCacheNewPod(podIp);
             } 
@@ -84,16 +85,14 @@ public class KubernetesControllerApplicationConfig {
         /* newPod.getStatus().getContainerStatuses().stream().forEach(c -> {
           c.getReady();
         }); */
-
-
           
 
-        if(newPod.isMarkedForDeletion() && keyValueStore.getIpList().contains(newIp)) {
-          keyValueStore.removeIp(newIp);
+        if(newPod.isMarkedForDeletion() && keyValueStore.endpointExists(newIp)) {
+          keyValueStore.removeEndpointByIp(newIp);
         }
         else if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
-          if (oldIp == null && newIp != null && !keyValueStore.getIpList().contains(newIp)) {
-            keyValueStore.addIp(newIp);
+          if (oldIp == null && newIp != null && !keyValueStore.endpointExists(newIp)) {
+            keyValueStore.addEndpoint(new Endpoint(newPod.getMetadata().getName(), newIp));
             if(!keyValueStore.isStartupPhase()) {
               httpClient.sendCacheNewPod(newIp);
             }
@@ -105,7 +104,7 @@ public class KubernetesControllerApplicationConfig {
       public void onDelete(Pod pod, boolean deletedFinalStateUnknown) {
         String podIp = pod.getStatus().getPodIP();
         if(podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
-          keyValueStore.removeIp(podIp);
+          keyValueStore.removeEndpointByIp(podIp);
         }
       }
     };

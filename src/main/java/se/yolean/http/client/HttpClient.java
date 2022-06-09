@@ -37,7 +37,7 @@ public class HttpClient {
 
   // TODO: Code duplication and method name is not good
   public void postUpdate(List<Update> updateList) {
-    List<String> ipList = keyValueStore.getIpList();
+    List<String> ipList = keyValueStore.getipList();
     JsonObject updateInfo = jsonBuilder(updateList);
 
     for (String ip : ipList) {
