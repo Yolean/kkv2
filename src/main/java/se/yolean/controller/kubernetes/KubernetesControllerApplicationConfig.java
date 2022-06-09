@@ -1,5 +1,7 @@
 package se.yolean.controller.kubernetes;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -57,7 +59,6 @@ public class KubernetesControllerApplicationConfig {
       @Override
       public void onAdd(Pod pod) {
         String podIp = pod.getStatus().getPodIP();
-
         if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
           if (!keyValueStore.getIpList().contains(podIp)) {
             keyValueStore.addIp(podIp);
@@ -73,7 +74,10 @@ public class KubernetesControllerApplicationConfig {
         String oldIp = oldPod.getStatus().getPodIP();
         String newIp = newPod.getStatus().getPodIP();
 
-        if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
+        if(newPod.isMarkedForDeletion() && keyValueStore.getIpList().contains(newIp)) {
+          keyValueStore.removeIp(newIp);
+        }
+        else if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
           if (oldIp == null && newIp != null && !keyValueStore.getIpList().contains(newIp)) {
             keyValueStore.addIp(newIp);
             if(!keyValueStore.isStartupPhase()) {
