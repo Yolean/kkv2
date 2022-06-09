@@ -40,3 +40,7 @@ mp:
 se:
   yolean:
     client-proxy/mp-rest/scope: javax.inject.Singleton
+
+httpClient:
+  target:
+    port: 3000

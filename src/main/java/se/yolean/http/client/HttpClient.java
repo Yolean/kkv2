@@ -6,6 +6,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +29,13 @@ public class HttpClient {
   private static Vertx vertx = Vertx.vertx();
   private static WebClient client = WebClient.create(vertx);
 
+  @ConfigProperty(name = "httpClient.target.port")
+  int port;
+
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
   new CircuitBreakerOptions().setMaxRetries(5).setTimeout(2000));
 
+  // TODO: Code duplication and method name is not good
   public void postUpdate(List<Update> updateList) {
     List<String> ipList = keyValueStore.getIpList();
     JsonObject updateInfo = jsonBuilder(updateList);
@@ -38,7 +43,7 @@ public class HttpClient {
     for (String ip : ipList) {
       breaker.execute(future -> {
         client
-          .post(3000, ip, "/onupdate")
+          .post(port, ip, "/onupdate")
           .sendJsonObject(updateInfo, ar -> {
         if (ar.succeeded()) {
           future.complete();
@@ -46,7 +51,7 @@ public class HttpClient {
           logger.info("FAILED");
           future.fail(ar.cause());
         }
-      });
+        });
       });
     }
   }
@@ -55,14 +60,17 @@ public class HttpClient {
     List<Update> updateList = new ArrayList<>(keyValueStore.getUpdateMap().values());
     JsonObject updateInfo = jsonBuilder(updateList);
 
-    client
-    .post(3000, ip, "/onupdate")
-    .sendJsonObject(updateInfo, ar -> {
+    breaker.execute(future -> {
+      client
+        .post(port, ip, "/onupdate")
+        .sendJsonObject(updateInfo, ar -> {
       if (ar.succeeded()) {
-        logger.info("Successfully posted update to " + ip);
+        future.complete();
       } else {
-        logger.error("Failed to post update to " + ip);
+        logger.info("FAILED");
+        future.fail(ar.cause());
       }
+      });
     });
   }
 

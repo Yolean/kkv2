@@ -30,7 +30,7 @@ import se.yolean.http.client.HttpClient;
 import se.yolean.model.Update;
 
 import static org.mockito.Mockito.*;
-
+// TODO
 @QuarkusTest
 @Ignore
 @RunWith(MockitoJUnitRunner.class)

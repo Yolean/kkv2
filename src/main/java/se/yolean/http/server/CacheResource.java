@@ -65,6 +65,8 @@ public class CacheResource{
     return keyValueStore.getTopicPartitionOffset(topic, partition);
   }
 
+
+  // TODO: Streams do currently not work
   /**
    * All keys in this instance (none from the partitions not represented here),
    * newline separated.
