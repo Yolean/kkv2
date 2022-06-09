@@ -48,6 +48,8 @@ public class KubernetesControllerApplicationConfig {
 
   // Include readiness somehow in order to avoid post to unavailable pods
   // Idea: When Pod is no longer ready, save timestamp och compare to latest record to determine if push is needed when ready.
+
+  // TODO: Differentiate between startup and new pod after startup so that we do not push updates two times.
   @Singleton
   ResourceEventHandler<Pod> podReconciler(SharedIndexInformer<Pod> podInformer) {
     return new ResourceEventHandler<>() {
@@ -59,6 +61,9 @@ public class KubernetesControllerApplicationConfig {
         if (podIp != null && pod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
           if (!keyValueStore.getIpList().contains(podIp)) {
             keyValueStore.addIp(podIp);
+            if(!keyValueStore.isStartupPhase()) {
+              httpClient.sendCacheNewPod(podIp);
+            } 
           }
         }
       }
@@ -71,6 +76,9 @@ public class KubernetesControllerApplicationConfig {
         if (newPod.getMetadata().getLabels().containsValue(TARGET_LABEL)) {
           if (oldIp == null && newIp != null && !keyValueStore.getIpList().contains(newIp)) {
             keyValueStore.addIp(newIp);
+            if(!keyValueStore.isStartupPhase()) {
+              httpClient.sendCacheNewPod(newIp);
+            }
           }
         }
       }

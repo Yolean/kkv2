@@ -1,5 +1,6 @@
 package se.yolean.http.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -41,6 +42,21 @@ public class HttpClient {
         }
       });
     }
+  }
+
+  public void sendCacheNewPod(String ip) {
+    List<Update> updateList = new ArrayList<>(keyValueStore.getUpdateMap().values());
+    JsonObject updateInfo = jsonBuilder(updateList);
+
+    client
+    .post(3000, ip, "/onupdate")
+    .sendJsonObject(updateInfo, ar -> {
+      if (ar.succeeded()) {
+        logger.info("Successfully posted update to " + ip);
+      } else {
+        logger.error("Failed to post update to " + ip);
+      }
+    });
   }
 
   public JsonObject jsonBuilder(List<Update> updates) {
