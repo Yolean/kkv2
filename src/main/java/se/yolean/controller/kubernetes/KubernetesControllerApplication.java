@@ -10,6 +10,7 @@ import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.annotations.QuarkusMain;
+import se.yolean.KeyValueStore;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -23,6 +24,8 @@ public class KubernetesControllerApplication implements QuarkusApplication {
   SharedInformerFactory sharedInformerFactory;
   @Inject
   ResourceEventHandler<Pod> podEventHandler;
+  @Inject
+  KeyValueStore keyValueStore;
 
   @Override
   public int run(String... args) throws Exception {
@@ -35,6 +38,7 @@ public class KubernetesControllerApplication implements QuarkusApplication {
     sharedInformerFactory.startAllRegisteredInformers().get();
     final var podHandler = sharedInformerFactory.getExistingSharedIndexInformer(Pod.class);
     podHandler.addEventHandler(podEventHandler);
+    keyValueStore.setStartupPhase(false);
     Quarkus.waitForExit();
     return 0;
   }
