@@ -87,8 +87,8 @@ public class KeyValueStore {
     this.startupPhase = startupPhase;
   }
 
-  public boolean endpointExists(String ip) {
-    return endpoints.stream().filter(o -> o.getIp().equals(ip)).findFirst().isPresent();
+  public boolean endpointExists(Endpoint endpoint) {
+    return endpoints.contains(endpoint);
   }
 
   public List<String> getipList() {
