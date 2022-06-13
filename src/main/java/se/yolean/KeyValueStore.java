@@ -9,14 +9,14 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 
 import io.vertx.kafka.client.common.TopicPartition;
-import se.yolean.model.Endpoint;
+import se.yolean.model.UpdateTarget;
 import se.yolean.model.Update;
 import se.yolean.model.UpdateInfo;
 
 @ApplicationScoped
 public class KeyValueStore {
   
-  private HashSet<Endpoint> endpoints = new HashSet<>();
+  private HashSet<UpdateTarget> targets = new HashSet<>();
   private Map<String, Update> updateMap = new HashMap<>();
   private Map<TopicPartition, Long> topicPartitionOffset = new HashMap<>();
 
@@ -26,12 +26,12 @@ public class KeyValueStore {
   public KeyValueStore() {
   }
 
-  public HashSet<Endpoint> getEndpoints() {
-    return endpoints;
+  public HashSet<UpdateTarget> getTargets() {
+    return targets;
   }
 
-  public void setEndpoints(HashSet<Endpoint> endpoints) {
-    this.endpoints = endpoints;
+  public void setEndpoints(HashSet<UpdateTarget> targets) {
+    this.targets = targets;
   }
 
   public Map<String, Update> getUpdateMap() {
@@ -42,12 +42,12 @@ public class KeyValueStore {
     this.updateMap = updateMap;
   }
 
-  public void addEndpoint(Endpoint endpoint) {
-    endpoints.add(endpoint);
+  public void addEndpoint(UpdateTarget target) {
+    targets.add(target);
   }
 
-  public void removeEndpoint(Endpoint endpoint) {
-    endpoints.remove(endpoint);
+  public void removeEndpoint(UpdateTarget target) {
+    targets.remove(target);
   }
 
   public void updateKeyCache(Update update) {
@@ -87,17 +87,21 @@ public class KeyValueStore {
     this.startupPhase = startupPhase;
   }
 
-  public boolean endpointExists(Endpoint endpoint) {
-    return endpoints.contains(endpoint);
+  public boolean targetExists(UpdateTarget target) {
+    return targets.contains(target);
   }
 
   public List<String> getipList() {
     List<String> ipList = new ArrayList<>();
-    endpoints.forEach(ep -> ipList.add(ep.getIp()));
+    targets.forEach(ep -> ipList.add(ep.getIp()));
     return ipList;
   }
 
   public void removeEndpointByIp(String ip) {
-    endpoints.removeIf(ep -> ep.getIp().equals(ip));
+    targets.removeIf(ep -> ep.getIp().equals(ip));
+  }
+
+  public void clearEndpoints() {
+    targets.clear();
   }
 }

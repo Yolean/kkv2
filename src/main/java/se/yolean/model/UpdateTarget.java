@@ -1,16 +1,16 @@
 package se.yolean.model;
 
-public class Endpoint {
+public class UpdateTarget {
   
   private String name;
   private String ip;
 
-  public Endpoint(String name, String ip) {
+  public UpdateTarget(String name, String ip) {
     this.name = name;
     this.ip = ip;
   }
 
-  public Endpoint() {
+  public UpdateTarget() {
   }
 
   public void setName(String name) {
@@ -51,7 +51,7 @@ public class Endpoint {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    Endpoint other = (Endpoint) obj;
+    UpdateTarget other = (UpdateTarget) obj;
     if (ip == null) {
       if (other.ip != null)
         return false;

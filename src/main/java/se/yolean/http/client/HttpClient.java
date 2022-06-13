@@ -16,7 +16,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import se.yolean.KeyValueStore;
-import se.yolean.model.Endpoint;
+import se.yolean.model.UpdateTarget;
 import se.yolean.model.Update;
 
 @ApplicationScoped
@@ -30,7 +30,7 @@ public class HttpClient {
   private static Vertx vertx = Vertx.vertx();
   private static WebClient client = WebClient.create(vertx);
 
-  @ConfigProperty(name = "httpClient.target.port")
+  @ConfigProperty(name = "kkv.target.port")
   int port;
 
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
@@ -49,7 +49,7 @@ public class HttpClient {
         if (ar.succeeded()) {
           future.complete();
         } else {
-          logger.info("FAILED");
+          logger.info("FAILED posting to {}", ip);
           future.fail(ar.cause());
         }
         });
@@ -57,7 +57,7 @@ public class HttpClient {
     }
   }
 
-  public void sendCacheNewPod(Endpoint endpoint) {
+  public void sendCacheNewPod(UpdateTarget endpoint) {
     String ip = endpoint.getIp();
     List<Update> updateList = new ArrayList<>(keyValueStore.getUpdateMap().values());
     JsonObject updateInfo = jsonBuilder(updateList);
