@@ -6,11 +6,11 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.mutiny.core.eventbus.EventBus;
 import se.yolean.KeyValueStore;
 import se.yolean.http.client.HttpClient;
 import se.yolean.model.Update;
@@ -24,13 +24,12 @@ public class KafkaConsumer {
   private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
 
   @Inject
-  EventBus bus;
-
-  @Inject
   HttpClient httpClient;
 
   @Inject
   KeyValueStore keyValueStore;
+
+  @ConfigProperty(name = "mp.messaging.incoming.ops.topic")
 
   @Incoming("config")
   public void consumer(ConsumerRecords<String, byte[]> records) {

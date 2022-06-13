@@ -7,25 +7,24 @@ quarkus:
   jib:
     #platforms: linux/arm64/v8
     platforms: linux/amd64
-
-
+  
 "%dev":
-  quarkus:
-    kafka:
-      devservices:
-        enabled: true
-        #image: vectorized/redpanda:latest
-        #port: 9092
+  kafka:
+    devservices:
+      enabled: true
     
 "%prod":
   kafka:
     bootstrap:
+      # servers: kafka-v2-write-bootstrap:9092
       servers: one-node-cluster.kkv.svc.cluster.local:9092
+
 
 mp:
   messaging:
     incoming:
-      config: 
+      ${KAFKA_INCOMING_TOPIC}:
+      #config: 
         connector: smallrye-kafka
         value:
           deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -36,11 +35,14 @@ mp:
             reset: earliest
         consumer-rebalance-listener:
           name: config.rebalancer
+        #group:
+        #  id: site-${YOLEANSITE_ID}_events-v1-backend
 
-se:
-  yolean:
-    client-proxy/mp-rest/scope: javax.inject.Singleton
-
-httpClient:
+kkv:
+  namespace: ${YOLEANSITE_ID}
+  #namespace: kkv
   target:
-    port: 3000
+    port: ${QUARKUS_HTTP_PORT}
+  endpointslice:
+    name: kkv-test-client-bvr9r
+    # Should this be the label selector of the service instead?
