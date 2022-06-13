@@ -6,6 +6,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,8 @@ public class KafkaConsumer {
 
   @Inject
   KeyValueStore keyValueStore;
+
+  @ConfigProperty(name = "mp.messaging.incoming.ops.topic")
 
   @Incoming("config")
   public void consumer(ConsumerRecords<String, byte[]> records) {

@@ -7,58 +7,42 @@ quarkus:
   jib:
     #platforms: linux/arm64/v8
     platforms: linux/amd64
-
-"%dev":
-  quarkus:
-    kafka:
-      devservices:
-        enabled: true
   
+"%dev":
+  kafka:
+    devservices:
+      enabled: true
+    
+"%prod":
+  kafka:
+    bootstrap:
+      # servers: kafka-v2-write-bootstrap:9092
+      servers: one-node-cluster.kkv.svc.cluster.local:9092
+
+
 mp:
   messaging:
     incoming:
-      ops:
+      ${KAFKA_INCOMING_TOPIC}:
+      #config: 
+        connector: smallrye-kafka
+        value:
+          deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+        key:
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
         auto:
           offset:
-            reset: ${AUTO_OFFSET_RESET:none}
-        bootstrap:
-          servers: bootstrap.kafka:9092
-        connector: smallrye-kafka
+            reset: earliest
+        consumer-rebalance-listener:
+          name: config.rebalancer
         #group:
         #  id: site-${YOLEANSITE_ID}_events-v1-backend
-        key:
-          deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-        topic: ${OPERATIONS_TOPIC_NAME}
-        value:
-          deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 kkv:
-  #namespace: ${YOLEANSITE_ID}
-  namespace: kkv
+  namespace: ${YOLEANSITE_ID}
+  #namespace: kkv
   target:
-    port: 3000 #8090
+    port: ${QUARKUS_HTTP_PORT}
   endpointslice:
     name: kkv-test-client-bvr9r
-    
-#"%prod":
-#  kafka:
-#    bootstrap:
-#      servers: one-node-cluster.kkv.svc.cluster.local:9092
-
-#mp:
-#  messaging:
-#    incoming:
-#      config: 
-#        connector: smallrye-kafka
-#        value:
-#          deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-#        key:
-#          deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#        auto:
-#          offset:
-#            reset: earliest
-#        consumer-rebalance-listener:
-#          name: config.rebalancer
-#        topic: config
-#        bootstrap:
-#          servers: one-node-cluster.kkv.svc.cluster.local:9092
+    # Should this be the label selector of the service instead?

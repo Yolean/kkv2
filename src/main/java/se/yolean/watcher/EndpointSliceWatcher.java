@@ -64,7 +64,7 @@ public class EndpointSliceWatcher implements QuarkusApplication {
           keyValueStore.getTargets().stream()
             .filter(target -> !oldTargets.contains(target.getIp()))
             .forEach(target -> httpClient.sendCacheNewPod(target));
-          logger.info("Update targets: {}", keyValueStore.getTargets().toString());
+          logger.info("Targets: {}", keyValueStore.getTargets().toString());
         }
       }
 
