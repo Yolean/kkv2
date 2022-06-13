@@ -31,7 +31,7 @@ public class HttpClient {
   private static WebClient client = WebClient.create(vertx);
 
   @ConfigProperty(name = "kkv.target.port")
-  String port;
+  int port;
 
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
   new CircuitBreakerOptions().setMaxRetries(5).setTimeout(2000));
@@ -44,7 +44,7 @@ public class HttpClient {
     for (String ip : ipList) {
       breaker.execute(future -> {
         client
-          .post(Integer.parseInt(port), ip, "/onupdate")
+          .post(port, ip, "/onupdate")
           .sendJsonObject(updateInfo, ar -> {
         if (ar.succeeded()) {
           future.complete();
@@ -64,7 +64,7 @@ public class HttpClient {
 
     breaker.execute(future -> {
       client
-        .post(Integer.parseInt(port), ip, "/onupdate")
+        .post(port, ip, "/onupdate")
         .sendJsonObject(updateInfo, ar -> {
       if (ar.succeeded()) {
         future.complete();

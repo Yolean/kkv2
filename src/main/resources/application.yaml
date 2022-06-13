@@ -17,14 +17,13 @@ quarkus:
   kafka:
     bootstrap:
       # servers: kafka-v2-write-bootstrap:9092
-      servers: one-node-cluster.kkv.svc.cluster.local:9092
+      servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 
 mp:
   messaging:
     incoming:
       ${KAFKA_INCOMING_TOPIC}:
-      #config: 
         connector: smallrye-kafka
         value:
           deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -32,7 +31,7 @@ mp:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         auto:
           offset:
-            reset: earliest
+            reset: ${KAFKA_OFFSET_RESET}
         consumer-rebalance-listener:
           name: config.rebalancer
         #group:
@@ -42,7 +41,7 @@ kkv:
   namespace: ${YOLEANSITE_ID}
   #namespace: kkv
   target:
-    port: ${QUARKUS_HTTP_PORT}
+    port: 3000
   endpointslice:
     name: kkv-test-client-bvr9r
     # Should this be the label selector of the service instead?
