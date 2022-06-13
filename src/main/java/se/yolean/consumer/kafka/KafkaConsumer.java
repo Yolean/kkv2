@@ -29,8 +29,6 @@ public class KafkaConsumer {
   @Inject
   KeyValueStore keyValueStore;
 
-  @ConfigProperty(name = "mp.messaging.incoming.ops.topic")
-
   @Incoming("config")
   public void consumer(ConsumerRecords<String, byte[]> records) {
     logger.info("New config @incoming");

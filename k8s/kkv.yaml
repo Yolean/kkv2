@@ -28,6 +28,17 @@ spec:
           image: yolean/kkv2
           ports:
             - containerPort: 8080
+          env:
+          - name: KAFKA_BOOTSTRAP_SERVERS
+            value: one-node-cluster.kkv.svc.cluster.local:9092
+          #- name: kafka_group_id
+          #  value: kkvdemo-testtopic
+          - name: KAFKA_INCOMING_TOPIC
+            value: config
+          - name: KAFKA_OFFSET_RESET
+            value: earliest
+          - name: YOLEANSITE_ID
+            value: kkv
       serviceAccountName: kkv2
 ---
 apiVersion: v1
