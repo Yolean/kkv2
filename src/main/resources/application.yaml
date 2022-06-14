@@ -34,7 +34,7 @@ mp:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         auto:
           offset:
-            reset: ${KAFKA_OFFSET_RESET}
+            reset: ${KAFKA_OFFSET_RESET:earliest}
         consumer-rebalance-listener:
           name: config.rebalancer
         #group:
@@ -44,4 +44,17 @@ kkv:
   target:
     service:
       name: ${TARGET_SERVICE_NAME}
-      port: ${TARGET_SERVICE_PORT}
+      port: ${TARGET_SERVICE_PORT:8080}
+
+"%test":
+  mp:
+    messaging:
+      incoming:
+        config:
+          topic: ${KAFKA_INCOMING_TOPIC:kkv-test-topic}
+          bootstrap:
+            servers: ${KAFKA_BOOTSTRAP_SERVERS:kkv-test-kafka}
+  kkv:
+    target:
+      service:
+        name: kkv-test-service
