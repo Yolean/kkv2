@@ -53,7 +53,7 @@ kkv:
         config:
           topic: ${KAFKA_INCOMING_TOPIC:kkv-test-topic}
           bootstrap:
-            servers: ${KAFKA_BOOTSTRAP_SERVERS:kkv-test-kafka}
+            servers: ""
   kkv:
     target:
       service:
