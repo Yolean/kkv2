@@ -20,9 +20,6 @@ public class KeyValueStore {
   private Map<String, Update> updateMap = new HashMap<>();
   private Map<TopicPartition, Long> topicPartitionOffset = new HashMap<>();
 
-  // TODO: Is this a hack? Could it cause problems?
-  private boolean startupPhase = true;
-
   public KeyValueStore() {
   }
 
@@ -77,14 +74,6 @@ public class KeyValueStore {
 
   public void setTopicPartitionOffset(Map<TopicPartition, Long> topicPartitionOffset) {
     this.topicPartitionOffset = topicPartitionOffset;
-  }
-
-  public boolean isStartupPhase() {
-    return startupPhase;
-  }
-
-  public void setStartupPhase(boolean startupPhase) {
-    this.startupPhase = startupPhase;
   }
 
   public boolean targetExists(UpdateTarget target) {
