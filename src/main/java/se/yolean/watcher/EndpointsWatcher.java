@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @QuarkusMain
-public class EndpointSliceWatcher implements QuarkusApplication {
+public class EndpointsWatcher implements QuarkusApplication {
 
   @Inject
   KubernetesClient client;
@@ -30,7 +30,7 @@ public class EndpointSliceWatcher implements QuarkusApplication {
   @Inject
   HttpClient httpClient;
 
-  private static final Logger logger = LoggerFactory.getLogger(EndpointSliceWatcher.class);
+  private static final Logger logger = LoggerFactory.getLogger(EndpointsWatcher.class);
 
   @ConfigProperty(name = "kkv.target.service.name")
   String serviceName;
@@ -76,6 +76,6 @@ public class EndpointSliceWatcher implements QuarkusApplication {
   }
 
   public static void main(String... args) {
-    Quarkus.run(EndpointSliceWatcher.class, args);
+    Quarkus.run(EndpointsWatcher.class, args);
   }
 }
