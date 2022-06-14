@@ -48,7 +48,6 @@ public class EndpointSliceWatcher implements QuarkusApplication {
             .flatMap(Collection::stream)
             .forEach(target -> keyValueStore.addEndpoint(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));            
           logger.info("Initial targets: {}", keyValueStore.getTargets().toString());
-          keyValueStore.setStartupPhase(false);
         }
 
         else if (action == Action.MODIFIED) {

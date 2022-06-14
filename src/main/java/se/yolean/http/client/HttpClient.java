@@ -10,6 +10,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.micronaut.context.annotation.Value;
 import io.vertx.circuitbreaker.CircuitBreaker;
 import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Vertx;
@@ -31,7 +32,7 @@ public class HttpClient {
   private static WebClient client = WebClient.create(vertx);
 
   @ConfigProperty(name = "kkv.target.service.port")
-  Integer port;
+  int port;
 
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
   new CircuitBreakerOptions().setMaxRetries(5).setTimeout(2000));

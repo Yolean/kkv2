@@ -21,6 +21,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
 import se.yolean.KeyValueStore;
+import se.yolean.model.Update;
 
 @Path("/cache/v1")
 public class CacheResource{
@@ -35,11 +36,12 @@ public class CacheResource{
     if (key == "") {
       throw new javax.ws.rs.BadRequestException("Request key can not be empty");
     }
-    final byte[] value = keyValueStore.getKeyCache(key).getValue();
-    if (value == null) {
+    Update update = keyValueStore.getKeyCache(key);
+    
+    if (update == null) {
       throw new NotFoundException();
     }
-    return value;
+    return keyValueStore.getKeyCache(key).getValue();
   }
 
   @GET
