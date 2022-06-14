@@ -1,24 +1,14 @@
 quarkus:
   container-image:
     build: true
-    image: yolean/kkv2
+    image: ${IMAGE:yolean/kkv2}
+    push: ${IMAGE_PUSH:false}
+    insecure: ${IMAGE_PUSH_INSECURE:false}
   tls:
-    trust-all: true
+    trust-all: ${IMAGE_PUSH_TRUST_ALL:false}
   jib:
     #platforms: linux/arm64/v8
     platforms: linux/amd64
-  
-#"%dev":
-#  kafka:
-#    devservices:
-#      enabled: true
-#    
-#"%prod":
-#  kafka:
-#    bootstrap:
-#      # servers: kafka-v2-write-bootstrap:9092
-#      servers: ${KAFKA_BOOTSTRAP_SERVERS}
-
 
 mp:
   messaging:
