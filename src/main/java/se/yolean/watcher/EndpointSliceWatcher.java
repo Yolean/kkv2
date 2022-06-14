@@ -1,6 +1,6 @@
 package se.yolean.watcher;
 
-import io.fabric8.kubernetes.api.model.discovery.v1beta1.EndpointSlice;
+import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
@@ -11,6 +11,7 @@ import se.yolean.KeyValueStore;
 import se.yolean.http.client.HttpClient;
 import se.yolean.model.UpdateTarget;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,23 +32,21 @@ public class EndpointSliceWatcher implements QuarkusApplication {
 
   private static final Logger logger = LoggerFactory.getLogger(EndpointSliceWatcher.class);
 
-  @ConfigProperty(name = "kkv.namespace")
-  String namespace;
-
-  @ConfigProperty(name = "kkv.endpointslice.name")
-  String endpointsliceName;
+  @ConfigProperty(name = "kkv.target.service.name")
+  String serviceName;
 
   @Override
   public int run(String... args) throws Exception {
 
-    client.discovery().v1beta1().endpointSlices().inNamespace(namespace).withName(endpointsliceName).watch(new Watcher<EndpointSlice>() {
+    client.endpoints().withName(serviceName).watch(new Watcher<Endpoints>() {
       @Override
-      public void eventReceived(Action action, EndpointSlice resource) {
+      public void eventReceived(Action action, Endpoints resource) {
         if (action == Action.ADDED) {
           keyValueStore.clearEndpoints();
-          resource.getEndpoints().forEach(endpoint -> {
-            keyValueStore.addEndpoint(new UpdateTarget(endpoint.getTargetRef().getName(), endpoint.getAddresses().get(0)));
-          });
+          resource.getSubsets().stream()
+            .map(subset -> subset.getAddresses())
+            .flatMap(Collection::stream)
+            .forEach(target -> keyValueStore.addEndpoint(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));            
           logger.info("Initial targets: {}", keyValueStore.getTargets().toString());
           keyValueStore.setStartupPhase(false);
         }
@@ -55,11 +54,10 @@ public class EndpointSliceWatcher implements QuarkusApplication {
         else if (action == Action.MODIFIED) {
           List<String> oldTargets = keyValueStore.getipList();
           keyValueStore.clearEndpoints();
-          resource.getEndpoints().stream()
-            .filter(endpoint -> endpoint.getConditions().getReady())
-            .forEach(endpoint -> {
-            keyValueStore.addEndpoint(new UpdateTarget(endpoint.getTargetRef().getName(), endpoint.getAddresses().get(0)));
-          });
+          resource.getSubsets().stream()
+            .map(slice -> slice.getAddresses())
+            .flatMap(Collection::stream)
+            .forEach(target -> keyValueStore.addEndpoint(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));
 
           keyValueStore.getTargets().stream()
             .filter(target -> !oldTargets.contains(target.getIp()))

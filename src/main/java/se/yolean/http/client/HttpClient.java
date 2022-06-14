@@ -30,13 +30,12 @@ public class HttpClient {
   private static Vertx vertx = Vertx.vertx();
   private static WebClient client = WebClient.create(vertx);
 
-  @ConfigProperty(name = "kkv.target.port")
-  int port;
+  @ConfigProperty(name = "kkv.target.service.port")
+  Integer port;
 
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
   new CircuitBreakerOptions().setMaxRetries(5).setTimeout(2000));
 
-  // TODO: Code duplication and method name is not good
   public void postUpdate(List<Update> updateList) {
     List<String> ipList = keyValueStore.getipList();
     JsonObject updateInfo = jsonBuilder(updateList);
@@ -80,7 +79,6 @@ public class HttpClient {
     JsonObject jsonObject = new JsonObject();
 
     jsonObject.put("v", 1);
-    // TODO: FIX THIS, THIS IS A HACK FOR NOW. How should we handle multiple topics?
     jsonObject.put("topic", updates.get(0).getTopic());
 
     JsonObject offsetsJsonObject = new JsonObject();
