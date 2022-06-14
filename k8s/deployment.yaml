@@ -1,15 +1,7 @@
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: kkv2
-  namespace: kkv
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kkv2
-  namespace: kkv
   labels:
     app: kkv2
 spec:
@@ -41,40 +33,4 @@ spec:
             value: kkv-test-client
           - name: TARGET_SERVICE_PORT
             value: "3000"
-      serviceAccountName: kkv2
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kkv
-  namespace: kkv
-  labels:
-    app: kkv2
-spec:
-  ports:
-  - port: 8080
-    name: http
-  selector:
-    app: kkv2
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: podlister
-rules:
-- apiGroups: [""]
-  resources: ["*"]
-  verbs: ["get", "watch", "list"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: kkv2
-  namespace: kkv
-roleRef:
-  kind: ClusterRole
-  name: cluster-admin
-  apiGroup: rbac.authorization.k8s.io
+      serviceAccountName: kkv-v2
