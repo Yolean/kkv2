@@ -8,22 +8,25 @@ quarkus:
     #platforms: linux/arm64/v8
     platforms: linux/amd64
   
-"%dev":
-  kafka:
-    devservices:
-      enabled: true
-    
-"%prod":
-  kafka:
-    bootstrap:
-      # servers: kafka-v2-write-bootstrap:9092
-      servers: ${KAFKA_BOOTSTRAP_SERVERS}
+#"%dev":
+#  kafka:
+#    devservices:
+#      enabled: true
+#    
+#"%prod":
+#  kafka:
+#    bootstrap:
+#      # servers: kafka-v2-write-bootstrap:9092
+#      servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 
 mp:
   messaging:
     incoming:
-      ${KAFKA_INCOMING_TOPIC}:
+      config:
+        topic: ${KAFKA_INCOMING_TOPIC}
+        bootstrap:
+          servers: ${KAFKA_BOOTSTRAP_SERVERS}
         connector: smallrye-kafka
         value:
           deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -38,10 +41,7 @@ mp:
         #  id: site-${YOLEANSITE_ID}_events-v1-backend
 
 kkv:
-  namespace: ${YOLEANSITE_ID}
-  #namespace: kkv
   target:
-    port: 3000
-  endpointslice:
-    name: kkv-test-client-bvr9r
-    # Should this be the label selector of the service instead?
+    service:
+      name: ${TARGET_SERVICE_NAME}
+      port: ${TARGET_SERVICE_PORT}

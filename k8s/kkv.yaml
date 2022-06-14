@@ -37,8 +37,10 @@ spec:
             value: config
           - name: KAFKA_OFFSET_RESET
             value: earliest
-          - name: YOLEANSITE_ID
-            value: kkv
+          - name: TARGET_SERVICE_NAME
+            value: kkv-test-client
+          - name: TARGET_SERVICE_PORT
+            value: "3000"
       serviceAccountName: kkv2
 ---
 apiVersion: v1
