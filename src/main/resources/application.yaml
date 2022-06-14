@@ -7,6 +7,7 @@ quarkus:
   tls:
     trust-all: ${IMAGE_PUSH_TRUST_ALL:false}
   jib:
+    base-jvm-image: ${IMAGE_BASE_JRE:gcr.io/distroless/java17-debian11:nonroot@sha256:980641cf569010ba023f8ec232f0eea1d14071520b35f98edd805c891b219194}
     #platforms: linux/arm64/v8
     platforms: linux/amd64
 
