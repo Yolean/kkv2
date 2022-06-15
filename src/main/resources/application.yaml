@@ -11,6 +11,8 @@ quarkus:
     #platforms: linux/arm64/v8
     platforms: linux/amd64
   kafka:
+    health:
+      enabled: true
     snappy:
       # TODO true would require updated native build
       enabled: false
