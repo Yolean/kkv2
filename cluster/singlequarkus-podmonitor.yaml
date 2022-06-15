@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: singlequarkus
+  labels:
+    prometheus: now
+spec:
+  jobLabel: app
+  namespaceSelector:
+    any: false
+  selector:
+    matchLabels:
+      scrape: singlequarkus
+  podTargetLabels:
+  - site
+  podMetricsEndpoints:
+  - port: http
+    path: /q/metrics

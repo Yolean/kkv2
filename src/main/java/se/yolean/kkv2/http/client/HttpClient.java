@@ -46,8 +46,8 @@ public class HttpClient {
           .post(port, ip, "/onupdate")
           .sendJsonObject(updateInfo, ar -> {
         if (ar.succeeded()) {
+          logger.debug("Successfully dispatched update to ip: {}:{} with response code {}", ip, port, ar.result().statusCode());
           future.complete();
-          logger.debug("Successfully dispatched update to ip: {}:{}", ip, port);
         } else {
           logger.error("Failed to dispatch update to ip {}:{}", ip, port);
           future.fail(ar.cause());
@@ -67,8 +67,8 @@ public class HttpClient {
         .post(port, ip, "/onupdate")
         .sendJsonObject(updateInfo, ar -> {
       if (ar.succeeded()) {
+        logger.debug("Successfully dispatched update to ip: {}:{} with response code {}", ip, port, ar.result().statusCode());
         future.complete();
-        logger.debug("Successfully dispatched update to ip: {}:{}", ip, port);
       } else {
         logger.error("Failed to dispatch update to ip {}:{}", ip, port);
         future.fail(ar.cause());
