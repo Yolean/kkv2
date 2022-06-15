@@ -1,7 +1,7 @@
 package se.yolean.kkv2.http.client;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -31,7 +31,7 @@ public class HttpClient {
   private final Counter successfulUpdateDispatchCounter;
 
   private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
-
+  
   private static Vertx vertx = Vertx.vertx();
   private static WebClient client = WebClient.create(vertx);
 
@@ -39,72 +39,79 @@ public class HttpClient {
   int port;
 
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
-  new CircuitBreakerOptions().setMaxRetries(5).setTimeout(2000));
+    new CircuitBreakerOptions()
+      .setMaxRetries(4)
+      .setMaxFailures(100)
+      .setTimeout(2000)
+      .setResetTimeout(10000))
+      .retryPolicy(retryCount -> retryCount * 500L + (int)(Math.random() * 500L)
+  );
 
   public HttpClient(MeterRegistry meterRegistry) {
     failedUpdateDispatchCounter = meterRegistry.counter("failed_update_dispatch");
     successfulUpdateDispatchCounter = meterRegistry.counter("successful_update_dispatch");
   }
 
-  public void postUpdate(List<Update> updateList) {
-    List<String> ipList = keyValueStore.getipList();
-    JsonObject updateInfo = jsonBuilder(updateList);
+  public void postUpdate(Map<String, Update> newUpdates) {
+    HashSet<UpdateTarget> updateTargets = keyValueStore.getTargets();
+    JsonObject updateInfo = jsonBuilder(newUpdates);
 
-    for (String ip : ipList) {
+    for (UpdateTarget target : updateTargets) {
       breaker.execute(future -> {
         client
-          .post(port, ip, "/onupdate")
+          .post(port, target.getIp(), "/onupdate")
           .sendJsonObject(updateInfo, ar -> {
-        if (ar.succeeded()) {
-          successfulUpdateDispatchCounter.increment();
-          logger.debug("Successfully dispatched update to ip: {}:{} with response code {}", ip, port, ar.result().statusCode());
-          future.complete();
-        } else {
-          failedUpdateDispatchCounter.increment();
-          logger.error("Failed to dispatch update to ip {}:{}", ip, port);
-          future.fail(ar.cause());
-        }
-        });
+            if (ar.succeeded() && ar.result().statusCode() == 200) {
+              successfulUpdateDispatchCounter.increment();
+              logger.debug("Successfully dispatched update to {} on {}:{} with response code {}", target.getName(), target.getIp(), port, ar.result().statusCode());
+              future.complete();
+            } else {
+              failedUpdateDispatchCounter.increment();
+              logger.error("Failed to dispatch update for key(s) {} to {} on \"/onupdate\" ({})", 
+                newUpdates.keySet() , target.getName(), ar.cause().getMessage());
+              future.fail(ar.cause());
+            }
+          });
       });
     }
   }
 
-  public void sendCacheNewPod(UpdateTarget endpoint) {
-    String ip = endpoint.getIp();
-    List<Update> updateList = new ArrayList<>(keyValueStore.getUpdateMap().values());
-    JsonObject updateInfo = jsonBuilder(updateList);
+  public void sendCacheNewPod(UpdateTarget target) {
+    Map<String, Update> updateMap = keyValueStore.getUpdateMap();
+    JsonObject updateInfo = jsonBuilder(updateMap);
 
     breaker.execute(future -> {
       client
-        .post(port, ip, "/onupdate")
+        .post(port, target.getIp(), "/onupdate")
         .sendJsonObject(updateInfo, ar -> {
-      if (ar.succeeded()) {
-        successfulUpdateDispatchCounter.increment();
-        logger.debug("Successfully dispatched update to ip: {}:{} with response code {}", ip, port, ar.result().statusCode());
-        future.complete();
-      } else {
-        failedUpdateDispatchCounter.increment();
-        logger.error("Failed to dispatch update to ip {}:{}", ip, port);
-        future.fail(ar.cause());
-      }
-      });
+          if (ar.succeeded() && ar.result().statusCode() == 200) {
+            successfulUpdateDispatchCounter.increment();
+            logger.debug("Successfully dispatched update to {} on {}:{} with response code {}", target.getName(), target.getIp(), port, ar.result().statusCode());
+            future.complete();
+          } else {
+            failedUpdateDispatchCounter.increment();
+            logger.error("Failed to dispatch update for key(s) {} to {}:{} on \"/onupdate\" ({})", 
+            updateMap.keySet(), target.getName(), ar.cause().getMessage());
+            future.fail(ar.cause());
+          }
+        });
     });
   }
 
-  public JsonObject jsonBuilder(List<Update> updates) {
+  public JsonObject jsonBuilder(Map<String, Update> updates) {
     JsonObject jsonObject = new JsonObject();
 
     jsonObject.put("v", 1);
-    jsonObject.put("topic", updates.get(0).getTopic());
+    jsonObject.put("topic", updates.values().iterator().next().getTopic());
 
     JsonObject offsetsJsonObject = new JsonObject();
-    for (Update update : updates) {
+    for (Update update : updates.values()) {
       offsetsJsonObject.put(Integer.toString(update.getPartition()), update.getOffset());
     }
     jsonObject.put("offsets", offsetsJsonObject);
 
     JsonObject updatesJsonObject = new JsonObject();
-    for (Update update : updates) {
+    for (Update update : updates.values()) {
       updatesJsonObject.put(update.getKey(), new JsonObject());
     }
     jsonObject.put("updates", updatesJsonObject);

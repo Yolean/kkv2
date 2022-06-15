@@ -1,7 +1,6 @@
 package se.yolean.kkv2;
 
-import java.util.List;
-
+import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ public class JsonBuilderTest {
 
   @Test
   public void assertCorrectOnUpdateJsonBodyStructure() {
-    List<Update> updateList = List.of(new Update("test-topic", 0, 0, "key1", "value1".getBytes()));
+    Map<String, Update> updateList = Map.of("key1", new Update("test-topic", 0, 0, "key1", "value1".getBytes()));
 
     JsonObject jsonObject = httpClient.jsonBuilder(updateList);
 
