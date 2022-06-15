@@ -44,24 +44,8 @@
       <version>4.3.1</version>
     </dependency>
     <dependency>
-      <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock-jre8</artifactId>
-      <version>2.33.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>3.2.0</version>
-    </dependency>
-    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-reactive</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.smallrye.reactive</groupId>
-      <artifactId>mutiny</artifactId>
-      <version>1.5.0</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -70,14 +54,6 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-rest-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-rest-client-jackson</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-arc</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -108,19 +84,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-kubernetes</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-kubernetes-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-scheduler</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -141,26 +105,8 @@
       <artifactId>quarkus-config-yaml</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-ext-jdk15on</artifactId>
-      <version>1.70</version>
-    </dependency>
-    <dependency>
       <groupId>io.micronaut.kubernetes</groupId>
       <artifactId>micronaut-kubernetes-client</artifactId>
-      <version>3.1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>io.micronaut.kubernetes</groupId>
-      <artifactId>micronaut-kubernetes-informer</artifactId>
       <version>3.1.0</version>
     </dependency>
     <dependency>
@@ -214,16 +160,6 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
-      <!-- <plugin>
-        <groupId>com.google.cloud.tools</groupId>
-        <artifactId>jib-maven-plugin</artifactId>
-        <version>3.2.1</version>
-        <configuration>
-          <to>
-            <image>myimage</image>
-          </to>
-        </configuration>
-      </plugin> -->
     </plugins>
   </build>
   <profiles>
