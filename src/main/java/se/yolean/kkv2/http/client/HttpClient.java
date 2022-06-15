@@ -33,6 +33,7 @@ public class HttpClient {
   private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
   
   private static Vertx vertx = Vertx.vertx();
+      
   private static WebClient client = WebClient.create(vertx);
 
   @ConfigProperty(name = "kkv.target.service.port")
