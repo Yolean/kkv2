@@ -4,6 +4,8 @@ import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
@@ -26,18 +28,24 @@ public class EndpointsWatcher implements QuarkusApplication {
   @Inject
   KubernetesClient client;
   @Inject
-  KeyValueStore keyValueStore;
-  @Inject
   HttpClient httpClient;
+
+  private final KeyValueStore keyValueStore;
 
   private static final Logger logger = LoggerFactory.getLogger(EndpointsWatcher.class);
 
   @ConfigProperty(name = "kkv.target.service.name")
   String serviceName;
 
+  public EndpointsWatcher(MeterRegistry meterRegistry, KeyValueStore keyValueStore) {
+    this.keyValueStore = keyValueStore;
+    meterRegistry.gaugeCollectionSize("number_of_endpoints", Tags.empty(), keyValueStore.getTargets());
+    meterRegistry.gaugeCollectionSize("number_of_keys", Tags.empty(), keyValueStore.getUpdateMap().keySet());
+
+  }
+
   @Override
   public int run(String... args) throws Exception {
-
     client.endpoints().withName(serviceName).watch(new Watcher<Endpoints>() {
       @Override
       public void eventReceived(Action action, Endpoints resource) {
@@ -46,7 +54,8 @@ public class EndpointsWatcher implements QuarkusApplication {
           resource.getSubsets().stream()
             .map(subset -> subset.getAddresses())
             .flatMap(Collection::stream)
-            .forEach(target -> keyValueStore.addEndpoint(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));            
+            .forEach(target -> keyValueStore.addEndpoint(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));
+          
           logger.info("Initial targets: {}", keyValueStore.getTargets().toString());
         }
 

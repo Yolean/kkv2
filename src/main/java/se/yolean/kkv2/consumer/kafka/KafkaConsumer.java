@@ -10,6 +10,8 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import se.yolean.kkv2.KeyValueStore;
 import se.yolean.kkv2.http.client.HttpClient;
 import se.yolean.kkv2.model.Update;
@@ -22,11 +24,17 @@ public class KafkaConsumer {
 
   private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
 
+  private final Counter recordsConsumedCounter;
+
   @Inject
   HttpClient httpClient;
 
-  @Inject
   KeyValueStore keyValueStore;
+
+  public KafkaConsumer(KeyValueStore keyValueStore, MeterRegistry meterRegistry) {
+    this.keyValueStore = keyValueStore;
+    recordsConsumedCounter = meterRegistry.counter("records_consumed");
+  }
 
   @Incoming("config")
   public void consumer(ConsumerRecords<String, byte[]> records) {
@@ -34,6 +42,7 @@ public class KafkaConsumer {
     List<Update> updateList = new ArrayList<>();
     for (ConsumerRecord<String, byte[]> record : records) {
       if (record.key() != null) {
+        recordsConsumedCounter.increment();
         Update update = new Update(record.topic(), record.partition(), record.offset(), record.key(), record.value());
         keyValueStore.updateKeyCache(update);
         updateList.add(update);
