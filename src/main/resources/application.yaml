@@ -10,6 +10,30 @@ quarkus:
     base-jvm-image: ${IMAGE_BASE_JRE:gcr.io/distroless/java17-debian11:nonroot@sha256:980641cf569010ba023f8ec232f0eea1d14071520b35f98edd805c891b219194}
     #platforms: linux/arm64/v8
     platforms: linux/amd64
+  kafka:
+    snappy:
+      # TODO true would require updated native build
+      enabled: false
+  log:
+    category:
+      "io.vertx.kafka":
+        level: TRACE
+        min-level: TRACE
+      "org.apache.kafka":
+        level: ${LOG_LEVEL:INFO}
+        min-level: ${LOG_LEVEL:INFO}
+      "org.apache.kafka.clients.Metadata":
+        level: ${LOG_LEVEL:INFO}
+        min-level: ${LOG_LEVEL:INFO}
+      "org.apache.kafka.clients.FetchSessionHandler":
+        level: WARN
+        min-level: WARN
+      "org.apache.kafka.clients.NetworkClient":
+        level: ERROR
+        min-level: ERROR
+      "se.yolean":
+        level: ${LOG_LEVEL:DEBUG}
+        min-level: ${LOG_LEVEL:DEBUG}
 
 mp:
   messaging:
