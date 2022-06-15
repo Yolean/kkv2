@@ -1,4 +1,4 @@
-package se.yolean.model;
+package se.yolean.kkv2.model;
 
 public class UpdateTarget {
   

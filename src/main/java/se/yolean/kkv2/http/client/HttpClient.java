@@ -1,4 +1,4 @@
-package se.yolean.http.client;
+package se.yolean.kkv2.http.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +15,9 @@ import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import se.yolean.KeyValueStore;
-import se.yolean.model.UpdateTarget;
-import se.yolean.model.Update;
+import se.yolean.kkv2.KeyValueStore;
+import se.yolean.kkv2.model.Update;
+import se.yolean.kkv2.model.UpdateTarget;
 
 @ApplicationScoped
 public class HttpClient {
@@ -47,8 +47,9 @@ public class HttpClient {
           .sendJsonObject(updateInfo, ar -> {
         if (ar.succeeded()) {
           future.complete();
+          logger.debug("Successfully dispatched update to ip: {}:{}", ip, port);
         } else {
-          logger.info("FAILED posting to {}", ip);
+          logger.error("Failed to dispatch update to ip {}:{}", ip, port);
           future.fail(ar.cause());
         }
         });
@@ -67,8 +68,9 @@ public class HttpClient {
         .sendJsonObject(updateInfo, ar -> {
       if (ar.succeeded()) {
         future.complete();
+        logger.debug("Successfully dispatched update to ip: {}:{}", ip, port);
       } else {
-        logger.error("Failed to dispatch update to {}", ip);
+        logger.error("Failed to dispatch update to ip {}:{}", ip, port);
         future.fail(ar.cause());
       }
       });

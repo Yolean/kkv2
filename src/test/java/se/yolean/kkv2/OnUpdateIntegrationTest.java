@@ -1,4 +1,5 @@
-package se.yolean;
+package se.yolean.kkv2;
+/* package se.yolean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,23 +12,39 @@ import javax.inject.Inject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import io.quarkus.test.Mock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import se.yolean.consumer.kafka.KafkaConsumer;
+import se.yolean.http.client.HttpClient;
+import se.yolean.model.Update;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
-
+import static org.mockito.Mockito.*;
+// TODO
 @QuarkusTest
-public class CacheResourceIntegrationTest {
-
+@Ignore
+@RunWith(MockitoJUnitRunner.class)
+public class OnUpdateIntegrationTest {
+    
   @Inject
   KeyValueStore keyValueStore;
 
   @Inject
   KafkaConsumer kafkaConsumer;
+
+  @Captor
+  ArgumentCaptor<List<Update>> updateCaptor;
 
   static ConsumerRecords<String, byte[]> consumerRecords;
 
@@ -44,30 +61,20 @@ public class CacheResourceIntegrationTest {
   }
 
   @Test
-  public void assertThatLatestRecordReturnedForKey() {
+  public void verifyCorrectOnUpdateRequest() {
+    HttpClient httpClient = mock(HttpClient.class);
+    ArgumentCaptor<List<Update>> argument = ArgumentCaptor.forClass(List.class);
+    //doNothing().when(httpClient).postUpdate(argument.capture());
+    
+    verify(httpClient).postUpdate(argument.capture());
+    
+    List<Update> updates = argument.getValue();
+    Assertions.assertEquals(updates.size(), 3);
+
     kafkaConsumer.consumer(consumerRecords);
 
-    given()
-      .when().get("/cache/v1/raw/key1")
-      .then()
-        .statusCode(200)
-        .body(is("value2"));
+    
 
-    given()
-    .when().get("/cache/v1/raw/key2")
-    .then()
-      .statusCode(200)
-      .body(is("value3"));
+    
   }
-
-  @Test
-  public void assertCorrectOffset() {
-    kafkaConsumer.consumer(consumerRecords);
-
-    given()
-      .when().get("/cache/v1/offset/topic/1")
-      .then()
-        .statusCode(200)
-        .body(is("2"));
-  }
-}
+} */

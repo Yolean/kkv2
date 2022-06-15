@@ -1,4 +1,4 @@
-package se.yolean.watcher;
+package se.yolean.kkv2.watcher;
 
 import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -7,9 +7,9 @@ import io.fabric8.kubernetes.client.WatcherException;
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
-import se.yolean.KeyValueStore;
-import se.yolean.http.client.HttpClient;
-import se.yolean.model.UpdateTarget;
+import se.yolean.kkv2.KeyValueStore;
+import se.yolean.kkv2.http.client.HttpClient;
+import se.yolean.kkv2.model.UpdateTarget;
 
 import java.util.Collection;
 import java.util.List;
