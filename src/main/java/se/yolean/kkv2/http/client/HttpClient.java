@@ -1,4 +1,4 @@
-package se.yolean.http.client;
+package se.yolean.kkv2.http.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,20 +10,25 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.vertx.circuitbreaker.CircuitBreaker;
 import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import se.yolean.KeyValueStore;
-import se.yolean.model.UpdateTarget;
-import se.yolean.model.Update;
+import se.yolean.kkv2.KeyValueStore;
+import se.yolean.kkv2.model.Update;
+import se.yolean.kkv2.model.UpdateTarget;
 
 @ApplicationScoped
 public class HttpClient {
 
   @Inject
   KeyValueStore keyValueStore;
+
+  private final Counter failedUpdateDispatchCounter;
+  private final Counter successfulUpdateDispatchCounter;
 
   private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
@@ -36,6 +41,11 @@ public class HttpClient {
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
   new CircuitBreakerOptions().setMaxRetries(5).setTimeout(2000));
 
+  public HttpClient(MeterRegistry meterRegistry) {
+    failedUpdateDispatchCounter = meterRegistry.counter("failed_update_dispatch");
+    successfulUpdateDispatchCounter = meterRegistry.counter("successful_update_dispatch");
+  }
+
   public void postUpdate(List<Update> updateList) {
     List<String> ipList = keyValueStore.getipList();
     JsonObject updateInfo = jsonBuilder(updateList);
@@ -46,9 +56,12 @@ public class HttpClient {
           .post(port, ip, "/onupdate")
           .sendJsonObject(updateInfo, ar -> {
         if (ar.succeeded()) {
+          successfulUpdateDispatchCounter.increment();
+          logger.debug("Successfully dispatched update to ip: {}:{} with response code {}", ip, port, ar.result().statusCode());
           future.complete();
         } else {
-          logger.info("FAILED posting to {}", ip);
+          failedUpdateDispatchCounter.increment();
+          logger.error("Failed to dispatch update to ip {}:{}", ip, port);
           future.fail(ar.cause());
         }
         });
@@ -66,9 +79,12 @@ public class HttpClient {
         .post(port, ip, "/onupdate")
         .sendJsonObject(updateInfo, ar -> {
       if (ar.succeeded()) {
+        successfulUpdateDispatchCounter.increment();
+        logger.debug("Successfully dispatched update to ip: {}:{} with response code {}", ip, port, ar.result().statusCode());
         future.complete();
       } else {
-        logger.error("Failed to dispatch update to {}", ip);
+        failedUpdateDispatchCounter.increment();
+        logger.error("Failed to dispatch update to ip {}:{}", ip, port);
         future.fail(ar.cause());
       }
       });

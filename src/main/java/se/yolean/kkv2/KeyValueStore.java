@@ -1,4 +1,4 @@
-package se.yolean;
+package se.yolean.kkv2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,9 +9,9 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 
 import io.vertx.kafka.client.common.TopicPartition;
-import se.yolean.model.UpdateTarget;
-import se.yolean.model.Update;
-import se.yolean.model.UpdateInfo;
+import se.yolean.kkv2.model.Update;
+import se.yolean.kkv2.model.UpdateInfo;
+import se.yolean.kkv2.model.UpdateTarget;
 
 @ApplicationScoped
 public class KeyValueStore {

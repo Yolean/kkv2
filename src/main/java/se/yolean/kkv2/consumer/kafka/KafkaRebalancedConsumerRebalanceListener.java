@@ -1,4 +1,4 @@
-package se.yolean.consumer.kafka;
+package se.yolean.kkv2.consumer.kafka;
 
 import java.util.Collection;
 
