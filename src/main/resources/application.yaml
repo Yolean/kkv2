@@ -1,24 +1,41 @@
 quarkus:
   container-image:
     build: true
-    image: yolean/kkv2
+    image: ${IMAGE:yolean/kkv2}
+    push: ${IMAGE_PUSH:false}
+    insecure: ${IMAGE_PUSH_INSECURE:false}
   tls:
-    trust-all: true
+    trust-all: ${IMAGE_PUSH_TRUST_ALL:false}
   jib:
+    base-jvm-image: ${IMAGE_BASE_JRE:gcr.io/distroless/java17-debian11:nonroot@sha256:980641cf569010ba023f8ec232f0eea1d14071520b35f98edd805c891b219194}
     #platforms: linux/arm64/v8
     platforms: linux/amd64
-  
-#"%dev":
-#  kafka:
-#    devservices:
-#      enabled: true
-#    
-#"%prod":
-#  kafka:
-#    bootstrap:
-#      # servers: kafka-v2-write-bootstrap:9092
-#      servers: ${KAFKA_BOOTSTRAP_SERVERS}
-
+  kafka:
+    health:
+      enabled: true
+    snappy:
+      # TODO true would require updated native build
+      enabled: false
+  log:
+    category:
+      "io.vertx.kafka":
+        level: TRACE
+        min-level: TRACE
+      "org.apache.kafka":
+        level: ${LOG_LEVEL:INFO}
+        min-level: ${LOG_LEVEL:INFO}
+      "org.apache.kafka.clients.Metadata":
+        level: ${LOG_LEVEL:INFO}
+        min-level: ${LOG_LEVEL:INFO}
+      "org.apache.kafka.clients.FetchSessionHandler":
+        level: WARN
+        min-level: WARN
+      "org.apache.kafka.clients.NetworkClient":
+        level: ERROR
+        min-level: ERROR
+      "se.yolean":
+        level: ${LOG_LEVEL:DEBUG}
+        min-level: ${LOG_LEVEL:DEBUG}
 
 mp:
   messaging:
@@ -34,7 +51,7 @@ mp:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         auto:
           offset:
-            reset: ${KAFKA_OFFSET_RESET}
+            reset: ${KAFKA_OFFSET_RESET:earliest}
         consumer-rebalance-listener:
           name: config.rebalancer
         #group:
@@ -42,6 +59,20 @@ mp:
 
 kkv:
   target:
+    path: ${ON_UPDATE_PATH:/kafka-keyvalue/v1/updates}
     service:
       name: ${TARGET_SERVICE_NAME}
-      port: ${TARGET_SERVICE_PORT}
+      port: ${TARGET_SERVICE_PORT:8080}
+
+"%test":
+  mp:
+    messaging:
+      incoming:
+        config:
+          topic: ${KAFKA_INCOMING_TOPIC:kkv-test-topic}
+          bootstrap:
+            servers: ""
+  kkv:
+    target:
+      service:
+        name: kkv-test-service

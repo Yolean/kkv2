@@ -1,4 +1,4 @@
-package se.yolean.http.server;
+package se.yolean.kkv2.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,8 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
-import se.yolean.KeyValueStore;
-import se.yolean.model.Update;
+import se.yolean.kkv2.KeyValueStore;
+import se.yolean.kkv2.model.Update;
 
 @Path("/cache/v1")
 public class CacheResource{

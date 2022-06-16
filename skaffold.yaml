@@ -22,6 +22,6 @@ build:
         ignore:
         - target/**
 deploy:
-  kubectl:
-    manifests:
-    - ./k8s/kkv.yaml
+  kustomize:
+    paths:
+    - "./k8s"

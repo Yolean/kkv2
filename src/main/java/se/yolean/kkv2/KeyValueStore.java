@@ -1,4 +1,4 @@
-package se.yolean;
+package se.yolean.kkv2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,14 +9,14 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 
 import io.vertx.kafka.client.common.TopicPartition;
-import se.yolean.model.UpdateTarget;
-import se.yolean.model.Update;
-import se.yolean.model.UpdateInfo;
+import se.yolean.kkv2.model.Update;
+import se.yolean.kkv2.model.UpdateInfo;
+import se.yolean.kkv2.model.UpdateTarget;
 
 @ApplicationScoped
 public class KeyValueStore {
   
-  private HashSet<UpdateTarget> targets = new HashSet<>();
+  private HashSet<UpdateTarget> updateTargets = new HashSet<>();
   private Map<String, Update> updateMap = new HashMap<>();
   private Map<TopicPartition, Long> topicPartitionOffset = new HashMap<>();
 
@@ -24,11 +24,11 @@ public class KeyValueStore {
   }
 
   public HashSet<UpdateTarget> getTargets() {
-    return targets;
+    return updateTargets;
   }
 
-  public void setEndpoints(HashSet<UpdateTarget> targets) {
-    this.targets = targets;
+  public void setUpdateTargets(HashSet<UpdateTarget> updateTargets) {
+    this.updateTargets = updateTargets;
   }
 
   public Map<String, Update> getUpdateMap() {
@@ -39,12 +39,12 @@ public class KeyValueStore {
     this.updateMap = updateMap;
   }
 
-  public void addEndpoint(UpdateTarget target) {
-    targets.add(target);
+  public void addUpdateTarget(UpdateTarget target) {
+    updateTargets.add(target);
   }
 
-  public void removeEndpoint(UpdateTarget target) {
-    targets.remove(target);
+  public void removeUpdateTarget(UpdateTarget target) {
+    updateTargets.remove(target);
   }
 
   public void updateKeyCache(Update update) {
@@ -76,21 +76,21 @@ public class KeyValueStore {
     this.topicPartitionOffset = topicPartitionOffset;
   }
 
-  public boolean targetExists(UpdateTarget target) {
-    return targets.contains(target);
+  public boolean updateTargetExists(UpdateTarget updateTarget) {
+    return updateTargets.contains(updateTarget);
   }
 
   public List<String> getipList() {
     List<String> ipList = new ArrayList<>();
-    targets.forEach(ep -> ipList.add(ep.getIp()));
+    updateTargets.forEach(ep -> ipList.add(ep.getIp()));
     return ipList;
   }
 
-  public void removeEndpointByIp(String ip) {
-    targets.removeIf(ep -> ep.getIp().equals(ip));
+  public void removeUpdateTargetByIp(String ip) {
+    updateTargets.removeIf(ep -> ep.getIp().equals(ip));
   }
 
-  public void clearEndpoints() {
-    targets.clear();
+  public void clearUpdateTargets() {
+    updateTargets.clear();
   }
 }
