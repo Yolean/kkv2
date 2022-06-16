@@ -50,22 +50,22 @@ public class EndpointsWatcher implements QuarkusApplication {
       @Override
       public void eventReceived(Action action, Endpoints resource) {
         if (action == Action.ADDED) {
-          keyValueStore.clearEndpoints();
+          keyValueStore.clearUpdateTargets();
           resource.getSubsets().stream()
             .map(subset -> subset.getAddresses())
             .flatMap(Collection::stream)
-            .forEach(target -> keyValueStore.addEndpoint(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));
+            .forEach(target -> keyValueStore.addUpdateTarget(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));
           
           logger.info("Initial targets: {}", keyValueStore.getTargets().toString());
         }
 
         else if (action == Action.MODIFIED) {
           List<String> oldTargets = keyValueStore.getipList();
-          keyValueStore.clearEndpoints();
+          keyValueStore.clearUpdateTargets();
           resource.getSubsets().stream()
             .map(slice -> slice.getAddresses())
             .flatMap(Collection::stream)
-            .forEach(target -> keyValueStore.addEndpoint(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));
+            .forEach(target -> keyValueStore.addUpdateTarget(new UpdateTarget(target.getTargetRef().getName(), target.getIp())));
 
           keyValueStore.getTargets().stream()
             .filter(target -> !oldTargets.contains(target.getIp()))

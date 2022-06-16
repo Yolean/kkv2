@@ -1,7 +1,7 @@
 package se.yolean.kkv2.consumer.kafka;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -39,16 +39,16 @@ public class KafkaConsumer {
   @Incoming("config")
   public void consumer(ConsumerRecords<String, byte[]> records) {
     logger.info("Consuming new record(s)");
-    List<Update> updateList = new ArrayList<>();
+    Map<String, Update> newUpdates = new HashMap<>();
     for (ConsumerRecord<String, byte[]> record : records) {
       if (record.key() != null) {
         recordsConsumedCounter.increment();
         Update update = new Update(record.topic(), record.partition(), record.offset(), record.key(), record.value());
         keyValueStore.updateKeyCache(update);
-        updateList.add(update);
+        newUpdates.put(update.getKey(), update);
         logger.debug("Consumed new record on topic: {} with key: {} and offset: {}", record.topic(), record.key(), record.offset());
       }
     }
-    httpClient.postUpdate(updateList);
+    httpClient.postUpdate(newUpdates);
   }
 }
