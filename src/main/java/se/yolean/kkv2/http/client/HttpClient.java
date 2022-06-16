@@ -17,6 +17,7 @@ import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
+//import io.vertx.ext.web.client.WebClient;
 import se.yolean.kkv2.KeyValueStore;
 import se.yolean.kkv2.model.Update;
 import se.yolean.kkv2.model.UpdateTarget;
@@ -36,14 +37,16 @@ public class HttpClient {
       
   private static WebClient client = WebClient.create(vertx);
 
+  private final String endpointPath = "/onupdate";
+
   @ConfigProperty(name = "kkv.target.service.port")
   int port;
 
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
     new CircuitBreakerOptions()
-      .setMaxRetries(4)
+      .setMaxRetries(2)
       .setMaxFailures(100)
-      .setTimeout(2000)
+      .setTimeout(4000)
       .setResetTimeout(10000))
       .retryPolicy(retryCount -> retryCount * 500L + (int)(Math.random() * 500L)
   );
@@ -60,7 +63,7 @@ public class HttpClient {
     for (UpdateTarget target : updateTargets) {
       breaker.execute(future -> {
         client
-          .post(port, target.getIp(), "/onupdate")
+          .post(port, target.getIp(), endpointPath)
           .sendJsonObject(updateInfo, ar -> {
             if (ar.succeeded() && ar.result().statusCode() == 200) {
               successfulUpdateDispatchCounter.increment();
@@ -68,8 +71,9 @@ public class HttpClient {
               future.complete();
             } else {
               failedUpdateDispatchCounter.increment();
-              logger.error("Failed to dispatch update for key(s) {} to {} on \"/onupdate\" ({})", 
-                newUpdates.keySet() , target.getName(), ar.cause().getMessage());
+              logger.error("Failed to dispatch update for key(s) {} to {} on {}", 
+                //newUpdates.keySet() , target.getName(), ar.cause().getMessage());
+                newUpdates.keySet(), target.getName(), endpointPath);
               future.fail(ar.cause());
             }
           });
@@ -83,7 +87,7 @@ public class HttpClient {
 
     breaker.execute(future -> {
       client
-        .post(port, target.getIp(), "/onupdate")
+        .post(port, target.getIp(), endpointPath)
         .sendJsonObject(updateInfo, ar -> {
           if (ar.succeeded() && ar.result().statusCode() == 200) {
             successfulUpdateDispatchCounter.increment();
