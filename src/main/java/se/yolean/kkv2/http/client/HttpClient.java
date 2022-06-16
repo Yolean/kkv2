@@ -39,6 +39,9 @@ public class HttpClient {
   @ConfigProperty(name = "kkv.target.service.port")
   int port;
 
+  @ConfigProperty(name = "kkv.target.path")
+  String targetPath;
+
   CircuitBreaker breaker = CircuitBreaker.create("circuit-breaker", vertx,
     new CircuitBreakerOptions()
       .setMaxRetries(4)
@@ -60,17 +63,21 @@ public class HttpClient {
     for (UpdateTarget target : updateTargets) {
       breaker.execute(future -> {
         client
-          .post(port, target.getIp(), "/onupdate")
+          .post(port, target.getIp(), targetPath)
           .sendJsonObject(updateInfo, ar -> {
-            if (ar.succeeded() && ar.result().statusCode() == 200) {
+            if (ar.succeeded() && ar.result().statusCode() == 204) {
               successfulUpdateDispatchCounter.increment();
               logger.debug("Successfully dispatched update to {} on {}:{} with response code {}", target.getName(), target.getIp(), port, ar.result().statusCode());
               future.complete();
+            } else if (ar.failed()) {
+              failedUpdateDispatchCounter.increment();
+              logger.error("Failed to dispatch update for key(s) {} to {} on {} ({})", 
+                newUpdates.keySet() , target.getName(), targetPath, ar.cause().getMessage());
+              future.fail(ar.cause());
             } else {
               failedUpdateDispatchCounter.increment();
-              logger.error("Failed to dispatch update for key(s) {} to {} on \"/onupdate\" ({})", 
-                newUpdates.keySet() , target.getName(), ar.cause().getMessage());
-              future.fail(ar.cause());
+              logger.warn("Got {} instead of 204 from client {} on first dispatch of all keys",
+              ar.result().statusCode(), target.getName(), newUpdates.keySet());
             }
           });
       });
@@ -83,17 +90,21 @@ public class HttpClient {
 
     breaker.execute(future -> {
       client
-        .post(port, target.getIp(), "/onupdate")
+        .post(port, target.getIp(), targetPath)
         .sendJsonObject(updateInfo, ar -> {
-          if (ar.succeeded() && ar.result().statusCode() == 200) {
+          if (ar.succeeded() && ar.result().statusCode() == 204) {
             successfulUpdateDispatchCounter.increment();
             logger.debug("Successfully dispatched update to {} on {}:{} with response code {}", target.getName(), target.getIp(), port, ar.result().statusCode());
             future.complete();
+          } else if (ar.failed()) {
+            failedUpdateDispatchCounter.increment();
+            logger.error("Failed to dispatch update for key(s) {} to {}:{} on {} ({})", 
+            updateMap.keySet(), target.getName(), targetPath, ar.cause().getMessage());
+            future.fail(ar.cause());
           } else {
             failedUpdateDispatchCounter.increment();
-            logger.error("Failed to dispatch update for key(s) {} to {}:{} on \"/onupdate\" ({})", 
-            updateMap.keySet(), target.getName(), ar.cause().getMessage());
-            future.fail(ar.cause());
+            logger.warn("Got {} instead of 204 from client {} on first dispatch of all keys",
+              ar.result().statusCode(), target.getName());
           }
         });
     });
