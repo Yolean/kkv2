@@ -8,14 +8,22 @@ quarkus:
     trust-all: ${IMAGE_PUSH_TRUST_ALL:false}
   jib:
     base-jvm-image: ${IMAGE_BASE_JRE:gcr.io/distroless/java17-debian11:nonroot@sha256:980641cf569010ba023f8ec232f0eea1d14071520b35f98edd805c891b219194}
+    base-native-image: ${IMAGE_BASE_NATIVE:docker.io/yolean/runtime-quarkus-ubuntu:d091be226e9a62ee3cba9816cafedb8a06a17012@sha256:a4b4e77494c26720321b54a442b4806cdb59d426ae2266802bc5c8ed794dd2b6}
     #platforms: linux/arm64/v8
     platforms: linux/amd64
+  native:
+    builder-image: ${IMAGE_BUILDER_NATIVE:ERROR-we-depend-on-a-local-native-image-executable}
+    native-image-xmx: 6g
+    additional-build-args: >-
+      --install-exit-handlers,
+      --no-fallback
   kafka:
     health:
       enabled: true
     snappy:
       # TODO true would require updated native build
       enabled: false
+
   log:
     category:
       "io.vertx.kafka":
