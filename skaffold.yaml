@@ -36,6 +36,7 @@ profiles:
       clean
       package
       -Pnative
-      -Djib.allowInsecureRegistries=true
-      -Dquarkus.container-image.push=true
+      -Dquarkus.native.container-build=true
       )
+#-Djib.allowInsecureRegistries=true
+#-Dquarkus.container-image.push=true

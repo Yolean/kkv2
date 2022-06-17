@@ -22,7 +22,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 @ApplicationScoped
 public class KafkaConsumer {
 
-  private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
+  private final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
 
   private final Counter recordsConsumedCounter;
 

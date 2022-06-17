@@ -3,8 +3,8 @@ package se.yolean.kkv2.http.client;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import se.yolean.kkv2.KeyValueStore;
 import se.yolean.kkv2.model.Update;
 import se.yolean.kkv2.model.UpdateTarget;
 
-@ApplicationScoped
+@Singleton
 public class HttpClient {
 
   @Inject
@@ -29,12 +29,11 @@ public class HttpClient {
 
   private final Counter failedUpdateDispatchCounter;
   private final Counter successfulUpdateDispatchCounter;
-
-  private final Logger logger = LoggerFactory.getLogger(HttpClient.class);
   
   Vertx vertx = Vertx.vertx();
-      
   WebClient client = WebClient.create(vertx);
+
+  private final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
   @ConfigProperty(name = "kkv.target.service.port")
   int port;
@@ -48,8 +47,7 @@ public class HttpClient {
       .setMaxFailures(100)
       .setTimeout(2000)
       .setResetTimeout(10000))
-      .retryPolicy(retryCount -> retryCount * 500L + (int)(Math.random() * 500L)
-  );
+      .retryPolicy(retryCount -> retryCount * 500L);
 
   public HttpClient(MeterRegistry meterRegistry) {
     failedUpdateDispatchCounter = meterRegistry.counter("failed_update_dispatch");
@@ -77,7 +75,7 @@ public class HttpClient {
             } else {
               failedUpdateDispatchCounter.increment();
               logger.warn("Got {} instead of 204 from client {} on first dispatch of all keys",
-              ar.result().statusCode(), target.getName(), newUpdates.keySet());
+              ar.result().statusCode(), target.getName());
             }
           });
       });
@@ -98,7 +96,7 @@ public class HttpClient {
             future.complete();
           } else if (ar.failed()) {
             failedUpdateDispatchCounter.increment();
-            logger.error("Failed to dispatch update for key(s) {} to {}:{} on {} ({})", 
+            logger.error("Failed to dispatch updates for key(s) {} to {} on {} ({})",
             updateMap.keySet(), target.getName(), targetPath, ar.cause().getMessage());
             future.fail(ar.cause());
           } else {
