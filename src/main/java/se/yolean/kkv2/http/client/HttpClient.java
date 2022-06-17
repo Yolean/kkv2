@@ -30,11 +30,11 @@ public class HttpClient {
   private final Counter failedUpdateDispatchCounter;
   private final Counter successfulUpdateDispatchCounter;
 
-  private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
+  private final Logger logger = LoggerFactory.getLogger(HttpClient.class);
   
-  private static Vertx vertx = Vertx.vertx();
+  Vertx vertx = Vertx.vertx();
       
-  private static WebClient client = WebClient.create(vertx);
+  WebClient client = WebClient.create(vertx);
 
   @ConfigProperty(name = "kkv.target.service.port")
   int port;
