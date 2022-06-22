@@ -17,7 +17,7 @@ import org.apache.kafka.common.TopicPartition;
 @Identifier("config.rebalancer")
 public class KafkaRebalancedConsumerRebalanceListener implements KafkaConsumerRebalanceListener {
 
-  private static final Logger logger = LoggerFactory.getLogger(KafkaRebalancedConsumerRebalanceListener.class);
+  private final Logger logger = LoggerFactory.getLogger(KafkaRebalancedConsumerRebalanceListener.class);
   
  @Override
  public void onPartitionsAssigned(Consumer<?, ?> consumer, Collection<TopicPartition> partitions) {

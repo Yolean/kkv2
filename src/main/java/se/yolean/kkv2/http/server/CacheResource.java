@@ -1,23 +1,14 @@
 package se.yolean.kkv2.http.server;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Iterator;
-
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.stream.JsonGenerator;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
 import se.yolean.kkv2.KeyValueStore;
@@ -69,11 +60,11 @@ public class CacheResource{
 
 
   // TODO: Streams do currently not work
-  /**
+  /* 
    * All keys in this instance (none from the partitions not represented here),
    * newline separated.
    */
-  @GET()
+  /* @GET()
   @Path("/keys")
   public Response keys() {
     Iterator<String> all = keyValueStore.getUpdateMap().keySet().iterator();
@@ -88,12 +79,12 @@ public class CacheResource{
     };
     System.out.println(stream);
     return Response.ok(stream).build();
-  }
+  } */
 
-  /**
+  /*
    * All keys in this instance (none from the partitions not represented here).
    */
-  @GET()
+  /* @GET()
   @Path("/keys")
   @Produces(MediaType.APPLICATION_JSON)
   public Response keysJson() {
@@ -112,12 +103,12 @@ public class CacheResource{
       }
     };
     return Response.ok(stream).build();
-  }
+  } */
 
-  /**
+  /*
    * @return Newline separated values (no keys)
    */
-  @GET()
+  /* @GET()
   @Path("/values")
   @Produces(MediaType.TEXT_PLAIN)
   public Response values() {
@@ -133,6 +124,6 @@ public class CacheResource{
       }
     };
     return Response.ok(stream).build();
-  }
+  } */
 
 }

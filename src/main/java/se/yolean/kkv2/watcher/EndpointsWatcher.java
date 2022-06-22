@@ -30,9 +30,9 @@ public class EndpointsWatcher implements QuarkusApplication {
   @Inject
   HttpClient httpClient;
 
-  private final KeyValueStore keyValueStore;
+  KeyValueStore keyValueStore;
 
-  private static final Logger logger = LoggerFactory.getLogger(EndpointsWatcher.class);
+  private final Logger logger = LoggerFactory.getLogger(EndpointsWatcher.class);
 
   @ConfigProperty(name = "kkv.target.service.name")
   String serviceName;

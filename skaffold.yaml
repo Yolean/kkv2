@@ -25,3 +25,18 @@ deploy:
   kustomize:
     paths:
     - "./k8s"
+
+profiles:
+- name: prod-build
+  patches:
+  - op: replace
+    path: /build/artifacts/0/custom/buildCommand
+    value: >-
+      ( mvn
+      clean
+      package
+      -Pnative
+      -Dquarkus.native.container-build=true
+      )
+#-Djib.allowInsecureRegistries=true
+#-Dquarkus.container-image.push=true
